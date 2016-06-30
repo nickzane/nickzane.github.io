@@ -66,18 +66,17 @@
 	.timeline li .timelineUnit p {color:#666; font-size:12px; margin-top:5px;}
 	.skills-section {width:310px;}
     #skillstars {margin-left:40px; padding-bottom:10px; display:block; width: 70%; overflow:auto;}
-	.skills {margin-top:25px; margin-left:11px; overflow:hidden; border-left:1px solid #EEE;}
-	.skills li {margin-bottom:15px; float:left; padding-left:30px;}
+	.skills {margin-top:15px; margin-left:11px; overflow:hidden; border-left:1px solid #EEE;}
+	.skills li {margin-bottom:12px; float:left; padding-left:30px;}
 	.skills li h4 {width:140px; float:left; font-size:15px; color:#444; font-weight:normal;}
-	.skills li .rat0, .skills li .rat1, .skills li .rat2, .skills li .rat3, .skills li .rat4, .skills li .rat5, .skills li .rat6, .skills li .rat7 {width:123px; height:14px; float:left;}
-	.skills li .rat0 {background:url(../img/rats.png) no-repeat;}
-	.skills li .rat1 {background:url(../img/rats.png) no-repeat 0px -14px;}
-	.skills li .rat2 {background:url(../img/rats.png) no-repeat 0px -28px;}
-	.skills li .rat3 {background:url(../img/rats.png) no-repeat 0px -42px;}
-	.skills li .rat4 {background:url(../img/rats.png) no-repeat 0px -56px;}
-	.skills li .rat5 {background:url(../img/rats.png) no-repeat 0px -70px;}
-	.skills li .rat6 {background:url(../img/rats.png) no-repeat 0px -84px;}
-	.skills li .rat7 {background:url(../img/rats.png) no-repeat 0px -98px;}
+	.skills li .rat1, .skills li .rat2, .skills li .rat3, .skills li .rat4, .skills li .rat5, .skills li .rat6, .skills li .rat7 {width:160px; height:20px; float:left;}
+	.skills li .rat1 {background:url(../img/rats.png) no-repeat 0px -4px;;}
+	.skills li .rat2 {background:url(../img/rats.png) no-repeat 0px -26px;}
+	.skills li .rat3 {background:url(../img/rats.png) no-repeat 0px -48px;}
+	.skills li .rat4 {background:url(../img/rats.png) no-repeat 0px -70px;}
+	.skills li .rat5 {background:url(../img/rats.png) no-repeat 0px -92px;}
+	.skills li .rat6 {background:url(../img/rats.png) no-repeat 0px -114px;}
+    .skills li .rat7 {background:url(../img/rats.png) no-repeat 0px -136px;}
     #portfolio {padding:0 20px 20px 20px; overflow:hidden;}
 	#portfolio .extra-text {font-size:20px; padding:24px 0; border-bottom:1px solid #ededed; color:#999; margin-bottom:20px;}
 	#portfolio-filter {border-bottom:1px solid #ededed; overflow:hidden; padding:15px 0;}
