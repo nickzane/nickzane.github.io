@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Coded Planar Travel</title>
+</head>
+<body>
+    <style>
+        *{
+            border:0;
+            margin:0;
+            padding:0;
+        }
+        .demo {
+            border:1px solid #C0C0C0;
+            border-collapse:collapse;
+            padding:5px;
+            width:100%;
+        }
+        .demo th {
+            border:1px solid #C0C0C0;
+            background:#F0F0F0;
+        }
+        .demo td {
+            border:1px solid #C0C0C0;
+            height:2rem;
+        }
+        table td:nth-child(2){
+            text-align: center;
+        }
+        .rainbow-brite{
+            background:linear-gradient(233deg, #E56420, #C22525, #3D9C31, #37BBDE);
+        }
+        .rainbow-iridescent{
+            background:linear-gradient(233deg, #245EA4, #92B8E7, #2C246C, #9CA45A, #ACAC99, #303A4E);
+        }
+        .rainbow-pearl{
+            background:linear-gradient(233deg, #A9B8CA, #EFF4FA, #D0CDE7, #F1F5D6, #F8F8EC, #B1BED7);
+        }
+        .rainbow-spiral{
+            background:linear-gradient(120deg, #282C34 50%, #FF0000, #FFA500, #FFFF00, #008000, #0000FF, #4B0082, #EE82EE);
+        }
+        .black-spiral{
+            background:linear-gradient(23deg, #000000, #616161, #393939, #000000);
+        }
+        .white-spiral{
+            background:linear-gradient(23deg, #ffffff, #aeaeae, #7b7b7b, #ffffff);
+        }
+        .gray-spiral{
+            background:linear-gradient(23deg, #898989, #bab0b0, #4e4b4b, #837d80);
+        }
+        .red-spiral{
+            background:linear-gradient(23deg, #ff0000, #a60000, #520101, #8c0a24);
+        }
+        .flicker-water{
+            background: linear-gradient(110deg, #00008B 30%, #057954 60%);
+        }
+        .flicker-earth{
+            background: linear-gradient(110deg, #000000 0%,#3A3A3A 30%, #664422 60%, #864a0d 100%);
+        }
+        .flicker-fire{
+            background: linear-gradient(110deg, #AA0000 30%, #C86A2C 45%, #92f45d 55%, #03D511 60%);
+        }
+        .flicker-air{
+            background: linear-gradient(110deg, #4CB7FF 30%, #D0D0D0 60%);
+        }
+        .rainbow-brite, .rainbow-iridescent, .rainbow-pearl{
+            background-size:cover;
+            background-blend-mode: hard-light;
+            animation: hue-rotate 3s linear infinite;
+        }
+        .rainbow-spiral, .black-spiral, .white-spiral, .gray-spiral, .red-spiral{
+            background-size: 400% 400%;
+            animation: gradient 1s ease infinite;
+        }
+        .flicker-water, .flicker-earth, .flicker-fire, .flicker-air{
+            background-size: 400% 400%;
+            animation: flicker 1s ease infinite;
+        }
+        .water-container, .wind-container, ice-container {
+            position: relative;
+        }
+        .water-container{
+            background-color: #3e3ec6;
+        }
+        .wind-container{
+            background-color: #ADD8E6;
+        }
+        .ice-container{
+            background: #2A52BE;
+        }
+        .muck-container{
+            background: #005b17;
+        }
+        .magma-container{
+            background: #ee6300;
+        }
+        .smoke-container{
+            background: #CEAEFA;
+        }
+        .water {
+            background-color: #00008B; 
+        }
+        .wind {
+            background-color: #a3a9ab60; 
+        }
+        .ice, .muck, .magma, .smoke{
+            width:100%;
+            height:100%;
+            filter: blur(10px);
+        }
+        .ice{
+            animation: water 1s ease infinite;
+            box-shadow: inset 0 0 10000px rgba(255, 255, 255, 0.75);
+        }
+        .muck{
+            animation: water 4s ease infinite;
+            box-shadow: inset 0 0 100px rgba(0, 194, 165, 0.85);
+        }
+        .magma{
+            animation: water 8s ease infinite;
+            box-shadow: inset 0 0 100px rgba(139, 0, 0, 0.851);
+        }
+        .smoke{
+            animation: water 0.5s ease infinite;
+            box-shadow: inset 0 0 100px rgba(131, 122, 122, 0.851);
+        }
+        .water, .wind{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            animation: water 4s ease-in-out infinite;
+        }
+        .moss-granite{
+            background-image:
+            linear-gradient(45deg,
+              #76937a40,
+              #53535340),
+              url(data:image/gif;base64,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);
+              display:block;
+              width:100%;
+              height:100%;
+              animation: sway 5s ease infinite;
+        }
+        .flame{
+            background-image:
+            linear-gradient(90deg,
+              transparent,
+              transparent),
+              url(data:image/gif;base64,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);
+              display:block;
+              width:100%;
+              height:100%;
+              animation: sway 5s ease infinite;
+              background-size: 20% 110%;
+              opacity: 0.75;
+        }
+        @keyframes water {
+            0%,
+            100% {
+                clip-path: polygon(
+                    0% 35%,
+                    16% 34%,
+                    33% 40%,
+                    54% 50%,
+                    70% 51%,
+                    84% 49%,
+                    100% 42%,
+                    100% 100%,
+                    0% 100%
+                );
+            }
+            50% {
+                clip-path: polygon(
+                    0% 60%,
+                    15% 65%,
+                    34% 66%,
+                    51% 62%,
+                    67% 50%,
+                    84% 35%,
+                    100% 36%,
+                    100% 100%,
+                    0% 100%
+                );
+            }
+        }
+        @keyframes sway {
+            0% {
+                transform: skewX(-5deg) translate(5px);
+            }
+            50% {
+                transform: skewX(5deg) translate(-5px);
+            }
+            100% {
+                transform: skewX(-5deg) translate(5px);
+            }
+        }
+        @keyframes flicker {
+            0% {
+                background-position: 20% 50%;
+            }
+            50% {
+                background-position: 80% 50%;
+            }
+            100% {
+                background-position: 20% 50%;
+            }
+        }
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        @keyframes hue-rotate {
+            from {
+            -webkit-filter: hue-rotate(0);
+            -moz-filter: hue-rotate(0);
+            -ms-filter: hue-rotate(0);
+            filter: hue-rotate(0);
+            }
+            to {
+            -webkit-filter: hue-rotate(360deg);
+            -moz-filter: hue-rotate(360deg);
+            -ms-filter: hue-rotate(360deg);
+            filter: hue-rotate(360deg);
+            }
+        }
+    </style>
+    <table class="demo">
+        <thead>
+        <tr>
+            <th style="width:10%;">Associated Plane</th>
+            <th style="width:8%;">Planar Key</th>
+            <th style="width:42%;">Astral Sea Color Pool</th>
+            <th style="width:42%;">Ethereal Veil</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Negative Energy</td>
+            <td>Unknown</td>
+            <td style="background:#282C34" title="Cold Ebony">&nbsp;</td>
+            <td style="background:#252324" title="Glossy Black">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Positive Energy</td>
+            <td>Unknown</td>
+            <td style="background:#F2F3F4" title="Shining white">&nbsp;</td>
+            <td style="background:#F2F3F4" title="Shining white">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Elemental Chaos</td>
+            <td>Adamantine [A Note]</td>
+            <td class="rainbow-brite" title="Shifting prismatic">&nbsp;</td>
+            <td class="rainbow-brite" title="Shifting prismatic">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Elemental Plane: Air</td>
+            <td>Glass [A Note]</td>
+            <td class="wind-container" title="Pale Blue"><div class="wind" title="Pale Blue">&nbsp;</div></td>
+            <td class="flicker-air" title="Flickering white or blue">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Elemental Plane: Water</td>
+            <td>Copper [A Note]</td>
+            <td class="water-container" title="Dark Blue"><div class="water" title="Dark Blue">&nbsp;</div></td>
+            <td class="flicker-water" title="Flickering blue or green">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Elemental Plane: Fire</td>
+            <td>Brass [A Note]</td>
+            <td style="background:#B31B1B" title="Flaming carnelian"><div class="flame" title="Flaming carnelian">&nbsp;</div></td>
+            <td class="flicker-fire" title="Flickering green or red">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Elemental Plane: Earth</td>
+            <td>Titanium [A Note]</td>
+            <td style="overflow:hidden; background:#697076" title="Moss granite"><div class="moss-granite" title="Moss granite">&nbsp;</div></td>
+            <td class="flicker-earth" title="Flickering gray or brown">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Paraelemental Plane: Smoke and Ash</td>
+            <td>Tin [A Note]</td>
+            <td class="smoke-container" title="Pale Violet"><div class="smoke" title="Pale Violet">&nbsp;</div></td>
+            <td class="rainbow-pearl" title="Pearl">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Paraelemental Plane: Mist and Ice</td>
+            <td>Zinc [A Note]</td>
+            <td class="ice-container" title="Cerulean"><div class="ice" title="Cerulean">&nbsp;</div></td>
+            <td style="background:#7FFFD4" title="Aquamarine">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Paraelemental Plane: Ooze and Muck</td>
+            <td>Pewter [A Note]</td>
+            <td class="muck-container" title="Aqua Green"><div class="muck" title="Aqua Green">&nbsp;</div></td>
+            <td style="background:#7B3F00" title="Chocolate">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Paraelemental Plane: Lava and Magma</td>
+            <td>Bronze [A Note]</td>
+            <td class="magma-container" title="Dark Red"><div class="magma" title="Dark Red">&nbsp;</div></td>
+            <td style="background:#800000" title="Maroon">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Quasielemental Plane: Steam and Acid</td>
+            <td>Mithril [A♭ Note]</td>
+            <td style="background:linear-gradient(120deg, #87CEEB, #39FF14); background-size: 400% 400%; animation: gradient 1s ease infinite" title="Sky blue or Neon Green">&nbsp;</td>
+            <td style="background:linear-gradient(120deg, #FFFFF0, #5A5A5A); background-size: 400% 400%; animation: gradient 1s ease infinite"" title="Ivory or Dark gray">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Quasielemental Plane: Dust and Lightning</td>
+            <td>Electrum [A♭ Note]</td>
+            <td style="background:linear-gradient(120deg, #5A5A5A, #7DF9FF); background-size: 400% 400%; animation: gradient 1s ease infinite"" title="Dark grey or Electric blue">&nbsp;</td>
+            <td style="background:linear-gradient(120deg, #DEB587, #7F00FF); background-size: 400% 400%; animation: gradient 1s ease infinite"" title="Dun or Violet">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Quasielemental Plane: Void and Radiance</td>
+            <td>Obsidian [A♭ Note]</td>
+            <td style="background:linear-gradient(120deg, #4169e1, #FFDA29); background-size: 400% 400%; animation: gradient 1s ease infinite"" title="Royal blue or Vibrant Yellow">&nbsp;</td>
+            <td class="rainbow-spiral" title="Ebony or Shifting Rainbow">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Quasielemental Plane: Mineral and Salt</td>
+            <td>Lodestone [A♭ Note]</td>
+            <td style="background:linear-gradient(120deg, #303698, #F3FAFD); background-size: 400% 400%; animation: gradient 1s ease infinite"" title="Lapis Lazuli or Salt white">&nbsp;</td>
+            <td style="background:linear-gradient(120deg, #FFB6C1, #D2B48C); background-size: 400% 400%; animation: gradient 1s ease infinite"" title="Milky pink or Tan">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Ever-Changing Chaos of Limbo</td>
+            <td>Nickle [C Note]</td>
+            <td style="background:linear-gradient(23deg, #2a272d 15%, #757575 16%, #343434 17%, #343434 30%, #757575 56%, #2a272d 70%, #343434 80%, #2a272d 84%, #757575 86%, #343434 88%)" title="Jet Black">&nbsp;</td>
+            <td class="black-spiral" title="Swirling black">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Windswept Depths of Pandemonium</td>
+            <td>Iron [C# Note]</td>
+            <td style="background:#CA1F7B" title="Magenta">&nbsp;</td>
+            <td style="background:#9D2235" title="Crimson">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Infinite Layers of the Abyss</td>
+            <td>Iron [D Note]</td>
+            <td style="background:linear-gradient(23deg, #4c187f 15%, #d1a8fb 16%, #4c187f 17%, #9966CC 30%, #d1a8fb 56%, #7023bd 70%, #9966CC 80%, #4c187f 84%, #d1a8fb 86%, #9966CC 88%)" title="Amethyst">&nbsp;</td>
+            <td class="red-spiral" title="Swirling red">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Tarterian Depths of Carceri</td>
+            <td>Iron [E♭ Note]</td>
+            <td style="background:#808000" title="Olive">&nbsp;</td>
+            <td style="background:#5E716A" title="Gray-green">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Gray Wastes of Hades</td>
+            <td>Iron [E Note]</td>
+            <td style="background:#B7410E" title="Rust">&nbsp;</td>
+            <td style="background:#8B0000" title="Dark Red">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Bleak Eternity of Gehenna</td>
+            <td>Iron [F Note]</td>
+            <td style="background:#80461B" title="Russet">&nbsp;</td>
+            <td style="background:#E10600" title="Bright Red">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Nine Hells of Baator</td>
+            <td>Iron [F# Note]</td>
+            <td style="background:linear-gradient(23deg, #cf0015 15%, #9B111E 16%, #cf0015 17%, #710913 30%, #9B111E 56%, #710913 70%, #710913 80%, #cf0015 84%, #9B111E 86%, #710913 88%)" title="Ruby">&nbsp;</td>
+            <td style="background:linear-gradient(120deg, #ff0000, #000000)" title="Red & black">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Infernal Battlefield of Acheron</td>
+            <td>Iron [G Note]</td>
+            <td style="background:linear-gradient(23deg, #f56d37 15%, #E25822 16%, #a3380d 17%, #591c03 30%, #E25822 56%, #a3380d 70%, #591c03 80%, #a3380d 84%, #E25822 86%, #f56d37 88%)" title="Flame">&nbsp;</td>
+            <td style="background:linear-gradient(120deg, #b40300, #666666)" title="Metallic red">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Clockwork Nirvana of Mechanus</td>
+            <td>Silver [C Note]</td>
+            <td style="background:linear-gradient(23deg, #cdf1f9 15%, #ffffff 16%, #B9F2FF 17%, #66a1ae 30%, #ffffff 56%, #66a1ae 70%, #66a1ae 80%, #c2f4ff 84%, #FFFFFF 86%, #66a1ae 88%)" title="Diamond">&nbsp;</td>
+            <td style="background:#ffffff" title="White">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Peaceable Kingdoms of Arcadia</td>
+            <td>Gold [C# Note]</td>
+            <td style="background:linear-gradient(23deg, #ff9933 15%, #F4C430 16%, #9e540f 17%, #fee391 30%, #F4C430 56%, #f6db8c 70%, #9e540f 80%, #ffe598 84%, #F4C430 86%, #ff9933 88%)" title="Saffron">&nbsp;</td>
+            <td style="background:#ffffbb" title="Pale Yellow">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Seven Mounting Heavens of Celestia</td>
+            <td>Gold [D Note]</td>
+            <td style="background:linear-gradient(23deg, #D4AF37, #fcd85e, #b48b04, #fbe9ae)" title="Gold">&nbsp;</td>
+            <td style="background:#FFE900" title="Brilliant yellow">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Twin Paradises of Bytopia</td>
+            <td>Gold [E♭ Note]</td>
+            <td style="background:linear-gradient(23deg, #FFBF00 15%, #ffc832 16%, #9e7a0f 17%, #fee391 30%, #ffc832 56%, #f6db8c 70%, #9e7a0f 80%, #ffe598 84%, #ffc832 86%, #FFBF00 88%)" title="Amber">&nbsp;</td>
+            <td style="background:#8B8000" title="Dark Yellow">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Blessed Fields of Elysium</td>
+            <td>Gold [E Note]</td>
+            <td style="background:linear-gradient(23deg, #A8C3BC 15%, #d2f6ec 16%, #88b0a4 17%, #8bf4d6 30%, #d2f6ec 56%, #e6b1ee 70%, #88b0a4 80%, #8bf4d6 84%, #d2f6ec 86%, #A8C3BC 88%)" title="Opal">&nbsp;</td>
+            <td style="background:#023020" title="Dark Green">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Wilderness of the Beastlands</td>
+            <td>Gold [F Note]</td>
+            <td style="background:#014421" title="Forest Green">&nbsp;</td>
+            <td style="background:linear-gradient(23deg, #24ff6d 15%, #046307 16%, #0c702e 17%, #24ff6d 30%, #046307 56%, #24ff6d 70%, #0c702e 80%, #24ff6d 84%, #046307 86%, #24ff6d 88%)" title="Deep Emerald Green">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Olympian Glades of Arborea</td>
+            <td>Gold [F# Note]</td>
+            <td style="background:linear-gradient(23deg, #3361a6 15%, #4b6ea3 16%, #0F52BA 17%, #a3bee7 30%, #4b6ea3 56%, #3361a6 70%, #0F52BA 80%, #3361a6 84%, #4b6ea3 86%, #0F52BA 88%)" title="Sapphire">&nbsp;</td>
+            <td style="background:#0096FF" title="Bright Blue">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Heroic Domain of Ysgard</td>
+            <td>Gold [G Note]</td>
+            <td style="background:#4B0082" title="Indigo">&nbsp;</td>
+            <td style="background:#800080" title="Purple">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Concordant Domain of the Outlands</td>
+            <td>Platinum [C Note]</td>
+            <td style="background:#624A2E" title="Leather Brown">&nbsp;</td>
+            <td style="background:#964B00" title="Brown">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Astral Sea</td>
+            <td>Quartz [B Note]</td>
+            <td style="background:#BF94E4" title="Reflective Lavender">&nbsp;</td>
+            <td class="gray-spiral" title="Swirling gray">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Shadowdark</td>
+            <td>Steel [C Note]</td>
+            <td class="black-spiral" title="Spiraling Black">&nbsp;</td>
+            <td style="background:#A19A96" title="Dusky gray">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Faewild</td>
+            <td>Steel [C Note]</td>
+            <td style="background:linear-gradient(23deg, #24ff6d 15%, #50C878 16%, #0c702e 17%, #24ff6d 30%, #50C878 56%, #24ff6d 70%, #0c702e 80%, #24ff6d 84%, #50C878 86%, #24ff6d 88%)" title="Emerald Green">&nbsp;</td>
+            <td style="background:#f7fae3" title="Opalescent white">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>The Prime</td>
+            <td>Steel [C Note]</td>
+            <td style="background:linear-gradient(23deg, #ffffff, #aeaeae, #7b7b7b, #ffffff)" title="Silver">&nbsp;</td>
+            <td style="background:linear-gradient(23deg, #ffffff, #AAA9AD, #7b7b7b, #ffffff, #08E8DE, #06a29a, #08E8DE)" title="Metallic silver or Bright turquoise">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Ethereal</td>
+            <td>Crystal [B Note]</td>
+            <td class="white-spiral" title="Spiraling White">&nbsp;</td>
+            <td style="background-color:#CCC" class="rainbow-iridescent" title="Iridescent rainbow">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Demiplane</td>
+            <td>Varied</td>
+            <td style="background:linear-gradient(120deg, #debcfc, #71caf1)" title="Ethereal Purple">&nbsp;</td>
+            <td style="background:linear-gradient(120deg, #debcfc, #71caf1)" title="Ethereal Purple">&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Sigil, City of Doors</td>
+            <td>Platinum [C Note]<br>(Outlands Only)</td>
+            <td style="background:#708090" title="Shimmering Slate">&nbsp;</td>
+            <td style="background:#708090" title="Shimmering Slate">&nbsp;</td>
+        </tr>
+        <tbody>
+    </table>
+</body>
+</html>

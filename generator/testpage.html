@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dice Roller</title>
+</head>
+<body>
+  <h1>Dice Roller</h1>
+
+  
+  
+  
+  <div id="result"></div>
+  
+  <script>
+    
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+function rollCell(dice, number, dnum) {
+  var num = number ? Number(number) : 0;
+  var prof = document.getElementById("profTier").value;
+  var dnum = dnum ? Number(dnum) : document.getElementById("diceNumber").value;
+  var mod = document.getElementById("modifier").value;
+  var eh = document.getElementById("easyhard").value;
+  var adv = document.getElementById("advantage").value;
+  var profword;
+  switch (prof) {
+    case '0':
+      profval = 0;
+      profword = '';
+      break;
+    case '1':
+      profval = 4;
+      profword = ' + d' + profval;
+      break;
+    case '2':
+      profval = 6;
+      profword = ' + d' + profval;
+      break;
+    case '3':
+      profval = 8;
+      profword = ' + d' + profval;
+      break;
+    case '4':
+      profval = 10;
+      profword = ' + d' + profval;
+      break;
+    case '5':
+      profval = 12;
+      profword = ' + d' + profval;
+      break;
+  }
+  if (num != 0) {
+    mod = num;
+  }
+  var diceResult = 0;
+  var diceResults = '';
+  var roll = [];
+  var thisRoll;
+  var trueResult;
+  if (dnum > 1) {
+    for (var i = 0; i < dnum; i++) {
+      var thisProf = 0;
+      thisRoll = Number(getRandomIntMaxMin(dice));
+      roll.push(thisRoll);
+      if (profval != 0) {
+        thisProf = Number(getRandomIntMaxMin(profval));
+        roll.push(thisProf);
+      }
+    }
+    if (mod != 0) {
+      diceResults += mod + ', ';
+    }
+    for (var i = 0; i < roll.length; i++) {
+      if (i === roll.length - 1) {
+        diceResults += roll[i];
+      } else {
+        diceResults += roll[i] + ', ';
+      }
+    }
+    diceResult = roll.reduce((a, b) => a + b, 0);
+    var thing = mod;
+    if (profval != 0) {
+      thing = dnum + 'd' + profval + ' + ' + mod;
+    }
+    diceResult = diceResult + Number(mod);
+    trueResult = 'd' + dice + profword + ' [ ' + dnum + 'd' + dice + ' + ' + thing + ' ] ( ' + diceResults + ' ) Rolled ' + diceResult;
+  } else {
+    roll.push(getRandomIntMaxMin(dice));
+    roll.push(getRandomIntMaxMin(dice));
+    var easyhard = 0;
+    var advword = '';
+    var easyword = '';
+    var advnum = '';
+    var result = roll;
+    if (profval != 0) {
+      mod = Number(getRandomIntMaxMin(profval));
+    }
+    switch (eh) {
+      case '4':
+        easyhard = +8;
+        easyword = ' + ' + easyhard;
+        advword = '[EasyA] ';
+        break;
+      case '3':
+        easyhard = +5;
+        easyword = ' + ' + easyhard;
+        advword = '[Adv] ';
+        break;
+      case '2':
+        easyhard = +2;
+        easyword = ' + ' + easyhard;
+        advword = '[HardA] ';
+        break;
+      case '1':
+        easyhard = +3;
+        easyword = ' + ' + easyhard;
+        advword = '[Easy] ';
+        break;
+      case '-1':
+        easyhard = -3;
+        easyword = ' - ' + Math.abs(easyhard);
+        advword = '[Hard] ';
+        break;
+      case '-2':
+        easyhard = -2;
+        easyword = ' - ' + Math.abs(easyhard);
+        advword = '[EasyA] ';
+        break;
+      case '-3':
+        easyhard = -5;
+        easyword = ' - ' + Math.abs(easyhard);
+        advword = '[Dis] ';
+        break;
+      case '-4':
+        easyhard = -8;
+        easyword = ' - ' + Math.abs(easyhard);
+        advword = '[HardD] ';
+        break;
+    }
+    switch (adv) {
+      case '1':
+        result = roll.sort((a, b) => sortByDataString(a, b));
+        advword += 'Adv Roll';
+        advnum = ' (' + result[1] + ')';
+        break;
+      case '-1':
+        result = roll.sort((a, b) => { return a - b; });
+        advword += 'Dis Roll';
+        advnum = ' (' + result[1] + ')';
+        break;
+    }
+    if (mod !== '0') {
+      num = mod;
+    }
+    var newnum = result[0] + Number(num) + Number(easyhard);
+    if (result[0] === 1 && dice === 20) {
+      newnum = newnum + ` <span style="color:red">'Failure!'</span>`;
+    }
+    if (result[0] === 20 && dice === 20) {
+      newnum = newnum + ` 'Nat 20!'`;
+    }
+    if (result[0] === Number(1) && dice === 2) {
+      newnum = newnum + ` <span style="font-size:0.8em;">👑</span>`;
+    } else if (result[0] === Number(2) && dice === 2) {
+      newnum = newnum + ` <span style="font-size:0.8em;">💎</span>`;
+    }
+    trueResult = 'd' + dice + profword + ' [ ' + result[0] + advnum + ' + ' + num + easyword + ' ] ' + advword + ' Rolled ' + newnum;
+  }
+  var rainbow = ['rgb(255, 0, 0)', 'rgb(255, 154, 0)', 'rgb(100, 111, 11)', 'rgb(44, 77, 44)', 'rgb(28, 55, 166)', 'rgb(95, 21, 242)', 'rgb(186, 12, 248)', 'rgb(251, 7, 217)'];
+  var svgElement = document.querySelector('.background-svg');
+  var newColor = svgElement.querySelector('.st0').style.fill;
+  var newindex = rainbow.indexOf(newColor) + 1;
+  if (newindex < rainbow.length) {
+    svgElement.querySelector('.st0').style.fill = rainbow[newindex];
+  } else {
+    svgElement.querySelector('.st0').style.fill = rainbow[0];
+  }
+  var time = new Date().toLocaleTimeString();
+  document.getElementById("rollResult").innerHTML = trueResult;
+  document.getElementById('rollTime').innerHTML = '(' + time + ')';
+}
