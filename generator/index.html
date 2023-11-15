@@ -325,6 +325,41 @@
     <hr>
   </div>
   <div class="form-group">
+    <div id="chessmenbox">
+      <div class="chessmen">
+        <img onclick="addMarker('chess-pawn', '', '', 0)" src="svg/chess-pawn.svg" title="ADD BLACK PAWN"/>
+        <img onclick="addMarker('chess-rook', '', '', 0)" src="svg/chess-rook.svg" title="ADD BLACK ROOK"/>
+        <img onclick="addMarker('chess-knight', '', '', 0)" src="svg/chess-knight.svg" title="ADD BLACK KNIGHT"/>
+        <img onclick="addMarker('chess-bishop', '', '', 0)" src="svg/chess-bishop.svg" title="ADD BLACK BISHOP"/>
+        <img onclick="addMarker('chess-queen', '', '', 0)" src="svg/chess-queen.svg" title="ADD BLACK QUEEN"/>
+        <img onclick="addMarker('chess-king', '', '', 0)" src="svg/chess-king.svg" title="ADD BLACK KING"/>
+        <img onclick="addMarker('chess-circle', '', '', 0)" src="svg/chess-circle.svg" title="ADD CHECKER"/>
+        <img onclick="chessBoard()" src="svg/chess.svg" title="CHESS PIECES"/>
+        <img class="white" onclick="taflBoard()" src="svg/chess.svg" title="TAFL PIECES"/>
+        <img class="white" onclick="checkerBoard()" src="svg/chess-circle.svg" title="CHECKER PIECES"/>
+        <img onclick="clearChessboard()" src="svg/chess-board.svg" title="CLEAR BOARD"/>
+      </div>
+    </div>
+    <table id="zones">
+      <tbody>
+        <tr>
+          <td>Hiding</td>
+          <td>Hiding</td>
+          <td class="checkerboard">Hiding</td>
+          <td>Hiding</td>
+          <td>Hiding</td>
+        </tr>
+        <tr>
+          <td>Far</td>
+          <td>Near</td>
+          <td class="checkerboard">Close</td>
+          <td>Near</td>
+          <td>Far</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="color:#666; text-align:right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
+        onClick="countUp()">Round</button></div>
     <input style="width:100%" type="text" id="NPCname" placeholder="NPC/PC Name" />
     <select style="width:50%" id="NPCtier">
       <option value="random">Random Tier</option>
@@ -542,41 +577,6 @@
     </div>
     <div class="form-group" id="NPCgenerated">
     </div>
-    <div style="color:#666; text-align:right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
-        onClick="countUp()">Round</button></div>
-    <div id="chessmenbox">
-      <div class="chessmen">
-        <img onclick="addMarker('chess-pawn', '', '', 0)" src="svg/chess-pawn.svg" title="ADD BLACK PAWN"/>
-        <img onclick="addMarker('chess-rook', '', '', 0)" src="svg/chess-rook.svg" title="ADD BLACK ROOK"/>
-        <img onclick="addMarker('chess-knight', '', '', 0)" src="svg/chess-knight.svg" title="ADD BLACK KNIGHT"/>
-        <img onclick="addMarker('chess-bishop', '', '', 0)" src="svg/chess-bishop.svg" title="ADD BLACK BISHOP"/>
-        <img onclick="addMarker('chess-queen', '', '', 0)" src="svg/chess-queen.svg" title="ADD BLACK QUEEN"/>
-        <img onclick="addMarker('chess-king', '', '', 0)" src="svg/chess-king.svg" title="ADD BLACK KING"/>
-        <img onclick="addMarker('chess-circle', '', '', 0)" src="svg/chess-circle.svg" title="ADD CHECKER"/>
-        <img onclick="chessBoard()" src="svg/chess.svg" title="CHESS PIECES"/>
-        <img class="white" onclick="taflBoard()" src="svg/chess.svg" title="TAFL PIECES"/>
-        <img class="white" onclick="checkerBoard()" src="svg/chess-circle.svg" title="CHECKER PIECES"/>
-        <img onclick="clearChessboard()" src="svg/chess-board.svg" title="CLEAR BOARD"/>
-      </div>
-    </div>
-    <table id="zones">
-      <tbody>
-        <tr>
-          <td>Hiding</td>
-          <td>Hiding</td>
-          <td class="checkerboard">Hiding</td>
-          <td>Hiding</td>
-          <td>Hiding</td>
-        </tr>
-        <tr>
-          <td>Far</td>
-          <td>Near</td>
-          <td class="checkerboard">Close</td>
-          <td>Near</td>
-          <td>Far</td>
-        </tr>
-      </tbody>
-    </table>
     <div id="costSection" class="form-group">
       <hr>
     </div>
