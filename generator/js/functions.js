@@ -2052,6 +2052,7 @@ Abilities: ${ability}Gear: ${charGear}`;
   }
   function saveTxt(button) {
     var textContent = button.previousElementSibling.value;
+    console.log(textContent);
     var fileName = document.getElementById("NPCname").value === '' ? dataName = 'Unnamed' + setDays() : dataName = document.getElementById("NPCname").value + setDays();
     var textBlob = new Blob([textContent], { type: "text/plain" });
     saveAs(textBlob, `${fileName}.txt`);
@@ -2604,7 +2605,7 @@ Abilities: ${ability}Gear: ${charGear}`;
     var effort = effort ? effort : [0, 0, 0, 0, 0];
     health = health ? health : '10';
     tokenCounter++;
-    var tableElement = `<table onclick="event.preventDefault();" oncontextmenu="event.preventDefault();" class="NPCinfo" table-id="${name}-${tokenCounter}" data-name="${name}" style="color:#333; display:inline-table; width:600px">
+    var tableElement = `<table onclick="event.preventDefault();" oncontextmenu="event.preventDefault();" class="NPCinfo" table-id="${name}-${tokenCounter}" data-name="${name}">
     <thead>
       <tr style="height:60px">
         <th colspan="1">
@@ -2651,7 +2652,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         <td colspan="6"><h3 class="dataCount" contenteditable="true">${dataCount}</h3></td>
       </tr>
       <tr>
-        <td style="text-align:right; background-color:lightblue" colspan="8">
+        <td class="right lightback" colspan="8">
           <img style="float:left; height:1em; margin:1em;" src="svg/arrow-down-short-wide.svg" />
           <p style="float:left; margin-right:20px;" onclick="this.parentNode.parentNode.parentNode.parentNode.tBodies[0].style.display = 'table-row-group'">Click to Open</p>
           <img style="float:right; height:1em; margin:1em;" src="svg/arrow-up-wide-short.svg" />
