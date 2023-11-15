@@ -1,6 +1,14 @@
 var abilitySet = [...srdabilityDesc, ...abilityDesc];
 var creatureSet = [...srdCreatureDesc, ...npcDragonDesc, ...npcCreatureDesc];
 var npcSet = [...npcCharDesc, ...custCharDesc];
+document.addEventListener('DOMContentLoaded', function () {
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const body = document.body;
+  darkModeToggle.addEventListener('change', function () {
+    body.classList.toggle('dark-mode', darkModeToggle.checked);
+  });
+});
+
 function resetCount() {
     clicks = 0;
     document.getElementById("clicks").innerHTML = clicks;

@@ -63,6 +63,49 @@ h4 {
   background: url('svg/dice-d20.svg') left top/contain no-repeat;
 }
 
+.dark-mode, .dark-mode .navbar, .dark-mode #footer {
+  color:#cecac3;
+  background-color: #262a2b;
+}
+
+.dark-mode input, .dark-mode textarea, .dark-mode select, .dark-mode button {
+  color:white;
+  background-color: #1b1e1f;
+}
+
+.dark-mode .checkerboard{
+  background-image: linear-gradient(45deg, #2f3134 25%, transparent 25%), linear-gradient(-45deg, #2f3134 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #2f3134 75%), linear-gradient(-45deg, transparent 75%, #2f3134 75%);
+}
+
+.halfsies{
+  width:50%;
+}
+
+.quartersies{
+  width:25%;
+}
+
+.lightback{
+  background:lightblue;
+}
+
+.maroonback{
+  color:white;
+  background:maroon;
+}
+
+#results{
+  color:black;
+  background-color:white;
+  overflow-y:scroll;
+  display:hidden
+}
+
+#timerSet{
+  width:7em;
+  margin: 12px 16px;
+}
+
 #chessmenbox{
   position: relative;
 }
