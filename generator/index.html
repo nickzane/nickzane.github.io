@@ -13,7 +13,7 @@
   <script src="js/functions.js"></script>
   <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
-<body id="itemSection" class="main">
+<body id="namesSection" class="main">
   <input type="checkbox" class="read-more-state-calc" id="calc-box">
   <input type="checkbox" class="read-more-state-dice" id="dice-box">
   <div class="read-more-wrap-calc">
@@ -125,10 +125,10 @@
   </div>
   <header class="navbar">
     <nav class="menu">
-      <a href="#itemSection">Items</a>
-      <a href="#mythicSection">Mythic</a>
       <a href="#namesSection">Names</a>
       <a href="#npcSection">NPCs/PCs</a>
+      <a href="#mythicSection">Mythic</a>
+      <a href="#itemSection">Items</a>
       <a href="#mapSection">Map</a>
       <a href="javascript:startCount()">Countdown</a>
       <select onchange="document.getElementById('timesUp').style.display = 'none'" style="width:7em; margin: 12px 16px;"
@@ -167,300 +167,165 @@
     </div>
   </header>
   <div class="dialog-content">
-    <form>
-      <div class="form-group">
-        <input style="width:50%" onclick="this.value = stateDays()" name="days" id="days" type="text"
-          placeholder="current day number" readonly>
-        <input style="width:49.5%" onchange="this.previousElementSibling.value = stateDays(this.value)" name="offset"
-          id="offset" type="number" placeholder="offset current day number">
-      </div>
-      <div class="form-group">
-        <hr>
-      </div>
-      <div class="form-group">
-        <textarea id="itemIdea" name="itemIdea" rows="27"></textarea>
-      </div>
-      <div class="form-group">
-        <select style="width:33%" id="itemOptions">
-          <option value="Generic">Generic</option>
-          <option value="Generic Type">Generic Type</option>
-          <option value="Melee Weapon">Melee Weapon</option>
-          <option value="Ranged Weapon">Ranged Weapon</option>
-          <option value="Gun">Gun</option>
-          <option value="Trap">Trap</option>
-          <option value="Ammo">Ammo</option>
-          <option value="Bomb">Bomb</option>
-          <option value="Decoration">Decoration</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Armor">Armor</option>
-          <option value="Shield">Shield</option>
-          <option value="Instrument">Instrument</option>
-          <option value="Tool">Tool</option>
-          <option value="Container">Container</option>
-          <option value="Food">Food</option>
-          <option value="Spell">Spell</option>
-          <option value="Disease">Disease</option>
-          <option value="Poison">Poison</option>
-          <option value="Potion">Potion</option>
-          <option value="Elixir">Elixir</option>
-          <option value="Treasure">Treasure</option>
-          <option value="Locale">Locale</option>
-          <option value="Connection">Connection</option>
-        </select>
-        <select style="width:33%" id="itemtype">
-          <option value="Random">Level?</option>
-          <option value="Shabby">Shabby</option>
-          <option value="Common">Common</option>
-          <option value="Uncommon">Uncommon</option>
-          <option value="Rare">Rare</option>
-          <option value="Epic">Epic</option>
-        </select>
-        <select style="width:33%" id="cursetype">
-          <option value="Random">Curse?</option>
-          <option value="Cursed">Cursed</option>
-          <option value="Not Cursed">Not Cursed</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <button style="width:33%"
-          onclick="makeItem(document.getElementById('itemOptions').options[document.getElementById('itemOptions').selectedIndex].text)"
-          type="button">Make Item</button>
-        <button style="width:33%" onclick="makeItem()" type="button">Random Item</button>
-        <button style="width:33%" onclick="speakOutput(curses,1)" type="button">Curse</button>
-      </div>
-      <div id="mythicSection" class="form-group">
-        <hr>
-      </div>
-      <div class="form-group">
-        <textarea id="mythic" name="mythic" rows="10"></textarea>
-      </div>
-      <div class="form-group">
-        <hr>
-      </div>
-      <div class="form-group">
-        <input style="display:inline-block; width:89%" id="question" type="text" value=""
-          placeholder="Ask your Yes/No Question" />
-        <input style="display:inline-block; width:10%" id="manualNum" type="text" value="" placeholder="Manual Override" />
-      </div>
-      <div style="display:inline-block; width:33%" class="form-group">
-        <label for="event">
-          Event Type:
-        </label>
-        <select id="event">
-          <option value="Standard">Standard</option>
-          <option value="Horror">Horror</option>
-          <option value="Adventure">Adventure</option>
-          <option value="Mystery">Mystery</option>
-          <option value="Social">Social</option>
-          <option value="Personal">Personal</option>
-          <option value="Epic">Epic</option>
-        </select>
-      </div>
-      <div style="display:inline-block; width:33%" class="form-group">
-        <label for="oddsOptions">
-          Set Odds
-        </label>
-        <select onchange="addToOdds(this.value)" id="oddsOptions">
-          <option value="Impossible">Impossible</option>
-          <option value="No Way">No Way</option>
-          <option value="Very Unlikely">Very Unlikely</option>
-          <option value="Unlikely">Unlikely</option>
-          <option value="Even Odds" selected>Even Odds</option>
-          <option value="Somewhat Likely">Somewhat Likely</option>
-          <option value="Likely">Likely</option>
-          <option value="Very Likely">Very Likely</option>
-          <option value="Nearly Certain">Nearly Certain</option>
-          <option value="Sure Thing">Sure Thing</option>
-        </select>
-      </div>
-      <div style="display:inline-block; width:33%" class="form-group">
-        <label for="rankOptions">
-          Set Rank/Chaos
-        </label>
-        <select onchange="addToRank(this.value)" id="rankOptions">
-          <option value="Miniscule">Miniscule</option>
-          <option value="Weak">Weak</option>
-          <option value="Low">Low</option>
-          <option value="Below Average">Below Average</option>
-          <option value="Average" selected>Average</option>
-          <option value="Above Average">Above Average</option>
-          <option value="High">High</option>
-          <option value="Exceptional">Exceptional</option>
-          <option value="Incredible">Incredible</option>
-          <option value="Awesome">Awesome</option>
-          <option value="Superhuman">Superhuman</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <input style="display:inline-block; width:49%" id="odds" type="text" value="" placeholder="Default: Even Odds 4"
-          readonly="readonly" />
-        <input style="display:inline-block; width:50%" id="rank" type="text" value="" placeholder="Default: Average 4"
-          readonly="readonly" />
-      </div>
-      <div class="form-group">
-        <button style="width:33%" onclick="mythicGM(0)" type="button">Mythic</button>
-        <button style="width:33%" onclick="generateEvent(1)" type="button">Event</button>
-        <button style="width:33%" onclick="npcGenerate(0)" type="button">NPC Flavor</button>
-      </div>
-      <div id="namesSection" class="form-group">
-        <hr>
-      </div>
-      <div id="count">Name Generator:</div>
-      <select onchange="setIt(document.getElementById('preconfig').value);" id="preconfig">
-        <option value="!<s|B|Bv|v><V|s|'|V><s|V|C>">Default Formula</option>
-        <option
-          value="!((anvil|ash|axe|beggar’s|boat|bridge|castle|clear|coal|court|crest|crown|crystal|dark|death|deer|doom|dry|east|falcon|fall|fair|far|fire|fool’s|frey|frost|gloom|hammer|helm|hill|hogs|holly|hull|ice|iron|island|lake|lion|little|lone|meadow|mine|murk|new|north|oak|old|port|queens|rams|river|rock|rose|sea|shade|shepherd’s|shield|ship’s|snow|south|spear|spring|starry|storm|stone|summer|sword|vandal|wander|wave|well|west|willow|wind|winter|witch|wolf)|(atel|atol|bend|borne|borough|break|bridge|burn|castle|caster|cliff|coast|crest|croft|crown|dale|deep|den|edge|end|fall|falls|fell|feet|field|flower|ford|forge|fort|garden|glen|guard|gulch|haven|heart|heim|hill|hold|hole|hollow|horn|inn|islands|keep|land|lands|leaf|lock|march|marches|mead|meadow|meet|mere|mill|moor|mouth|outpost|pass|pool|ran|rest|ridge|roost|shield|shire|shore|side|spring|stone|ton|town|vale|wall|watch|water|wend|well|wick|wold|wood|worth))((atel|atol|bay|bend|borne|borough|break|bridge|burn|castle|caster|cliff|coast|crest|croft|crown|dale|deep|den|edge|end|fall|falls|fell|feet|field|flower|ford|forge|fort|garden|glade|glen|guard|gulch|haven|heart|heim|hill|hold|hole|hollow|horn|inn|islands|keep|land|lands|leaf|lock|march|marches|mead|meadow|meet|mere|mill|moor|mouth|outpost|pass|pool|ran|rest|ridge|roost|shield|shire|shore|side|spring|stone|ton|town|vale|wall|watch|water|wend|well|wick|wold|wood|worth)|((<v>r|ae|ang|ara|az|br|cal|car|ch|cor|cull|da|d<v>m|d<v>n|d<v>r|drac|ed|er|est|even|gon|gul|h<v>l|har|l<v>n|lui|mul|r<v>s|ray|ril|sher')(<v>|<v>d|a|b<v>|c<v>|d<v>|ess|h<v>|j<v>|l<v>|m<v>|on|or|s<v>|t<v>|)(<v|V>n|<v|V>r|<v|V>th|and|andia|ania|ara|as|ast|atel|atia|atol|bia|b<V>ra|cara|caria|d<v>r|dara|daria|den|dim|dolan|dol<V>n|dor|doria|ee|enta|entia|gar|gin|had|iand|iara|idara|idim|idol<V>n|inia|iora|lad|lan|ley|lie|mar|myr|myria|nara|naria|nath|natia|nen|nolan|nta|nt<V>|onia|patia|phar|phatia|r|r<v|V>th|rand|ren|ria|ril|rill|rua|ryn|tan|tar|tia|ton|tria|waith|wyn)))">
-          Places</option>
-        <option value="!<V|B><V|vs|Vs>">Short</option>
-        <option value="!<i|Cd|D><d|i>">Idiot</option>
-        <option value="!<D|i><i|d>">Dumb</option>
-        <option value="!<i|s>v(mon|chu|zard|rtle|vee|lax|to|gar|chomp|puff|ander|uck|arp|peon|pod|saur|owth|cham|ceon)">
-          Pokemon</option>
-        <option value="!<<s|ss>|<VC|vC|B|BVs|Vs>><v|V|v|<v(l|n|r)|vc>>(th)">Dragon Pern</option>
-        <option
-          value="!((<B>|s|h|ty|ph|r|)(i|ae|ya|ae|eu|ia|i|eo|ai|a))(lo|la|sri|da|dai|the|sty|lae|due|li|lly|ri|na|ral|sur|rith)(|(su|nu|sti|llo|ria|))(|(n|ra|p|m|lis|cal|deu|dil|suir|phos|ru|dru|rin|raap|rgue))">
-          Fantasy 1</option>
-        <option
-          value="!(cham|chan|jisk|lis|frich|isk|lass|mind|sond|sund|ass|chad|lirt|und|mar|lis|il|<BVC>)(jask|ast|ista|adar|irra|im|ossa|assa|osia|ilsa|<vCv>)(|(an|ya|la|sta|sda|sya|st|nya))">
-          Fantasy 2</option>
-        <option
-          value="!(ch|ch’t|sh|cal|val|ell|har|shar|shal|rel|laen|ral|jh’t|alr|ch|ch’t|av)(|(is|al|ow|ish|ul|el|ar|iel))(aren|aeish|aith|even|adur|ulash|alith|atar|aia|erin|aera|ael|ira|iel|ahur|ishul)">
-          Fantasy 3</option>
-        <option
-          value="!(ethr|qil|mal|er|eal|far|fil|fir|ing|ind|il|lam|quel|quar|quan|qar|pal|mal|yar|um|ard|enn|ey)(|(<vc>|on|us|un|ar|as|en|ir|ur|at|ol|al|an))(uard|wen|arn|on|il|ie|on|iel|rion|rian|an|ista|rion|rian|cil|mol|yon)">
-          Fantasy 4</option>
-        <option
-          value="!(taith|kach|chak|kank|kjar|rak|kan|kaj|tach|rskal|kjol|jok|jor|jad|kot|kon|knir|kror|kol|tul|rhaok|rhak|krol|jan|kag|ryr)(<vc>|in|or|an|ar|och|un|mar|yk|ja|arn|ir|ros|ror)(|(mund|ard|arn|karr|chim|kos|rir|arl|kni|var|an|in|ir|a|i|as))">
-          Fantasy 5</option>
-        <option
-          value="!(aj|ch|etz|etzl|tz|kal|gahn|kab|aj|izl|ts|jaj|lan|kach|chaj|qaq|jol|ix|az|biq|nam)(|(<vc>|aw|al|yes|il|ay|en|tom||oj|im|ol|aj|an|as))(aj|am|al|aqa|ende|elja|ich|ak|ix|in|ak|al|il|ek|ij|os|al|im)">
-          Fantasy 6</option>
-        <option
-          value="!(yi|shu|a|be|na|chi|cha|cho|ksa|yi|shu)(th|dd|jj|sh|rr|mk|n|rk|y|jj|th)(us|ash|eni|akra|nai|ral|ect|are|el|urru|aja|al|uz|ict|arja|ichi|ural|iru|aki|esh)">
-          Fantasy 7</option>
-        <option
-          value="!(syth|sith|srr|sen|yth|ssen|then|fen|ssth|kel|syn|est|bess|inth|nen|tin|cor|sv|iss|ith|sen|slar|ssil|sthen|svis|s|ss|s|ss)(|(tys|eus|yn|of|es|en|ath|elth|al|ell|ka|ith|yrrl|is|isl|yr|ast|iy))(us|yn|en|ens|ra|rg|le|en|ith|ast|zon|in|yn|ys)">
-          Fantasy 8</option>
-        <option value="!<s<v|V>(tia)|s<v|V>(os)|B<v|V>c(ios)|B<v|V><c|C>v(ios|os)>">Greek</option>
-        <option
-          value="!((||||||||A|Uru|Géme|Lú|Mag|Nig|Shesh|Nin|Me|E|Bau|Arad|Akad|Asad|)(s|c))(||||||||kala|egi|damu|lugal|sheg|nanna|dari|ninni|etil|anki|bau|tuda|silim|harra|shen|arra|risa)(|ar|iz|re|sa)">
-          Sumerian</option>
-        <option value="!sv(nia|lia|cia|sia)">Old Latin Place</option>
-        <option
-          value="!((h|k|l|m|n|p|w|')|)(a|e|i|o|u)((h|k|l|m|n|p|w|')|)(a|e|i|o|u)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)">
-          Hawaiian 1</option>
-        <option
-          value="!((h|k|l|m|n|p|w|)(a|e|i|o|u|a'|e'|i'|o'|u'|ae|ai|ao|au|oi|ou|eu|ei)(k|l|m|n|p|)|)(h|k|l|m|n|p|w|)(a|e|i|o|u|a'|e'|i'|o'|u'|ae|ai|ao|au|oi|ou|eu|ei)(k|l|m|n|p|)">
-          Hawaiian 2</option>
-        <option
-          value="!(aka|aki|bashi|gawa|kawa|furu|fuku|fuji|hana|hara|haru|hashi|hira|hon|hoshi|ichi|iwa|kami|kawa|ki|kita|kuchi|kuro|marui|matsu|miya|mori|moto|mura|nabe|naka|nishi|no|da|ta|o|oo|oka|saka|saki|sawa|shita|shima|i|suzu|taka|take|to|toku|toyo|ue|wa|wara|wata|yama|yoshi|kei|ko|zawa|zen|sen|ao|gin|kin|ken|shiro|zaki|yuki|asa)(||||||||||bashi|gawa|kawa|furu|fuku|fuji|hana|hara|haru|hashi|hira|hon|hoshi|chi|wa|ka|kami|kawa|ki|kita|kuchi|kuro|marui|matsu|miya|mori|moto|mura|nabe|naka|nishi|no|da|ta|o|oo|oka|saka|saki|sawa|shita|shima|suzu|taka|take|to|toku|toyo|ue|wa|wara|wata|yama|yoshi|kei|ko|zawa|zen|sen|ao|gin|kin|ken|shiro|zaki|yuki|sa)">
-          Japanese 1</option>
-        <option
-          value="!((a|i|u|e|o|||||)(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo))(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)(|(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)|(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)(|(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)))(|||n)">
-          Japanese 2</option>
-        <option
-          value="!(zh|x|q|sh|h)(ao|ian|uo|ou|ia)(|(l|w|c|p|b|m)(ao|ian|uo|ou|ia)(|n)|-(l|w|c|p|b|m)(ao|ian|uo|ou|ia)(|(d|j|q|l)(a|ai|iu|ao|i)))">
-          Chinese</option>
-        <option
-          value="!(ak|ch|cha|chak|chaka|chat|cheka|chil|chit|cho|chtik|chu|da|dasl|dej|dra|dre|drik|dul|g|gak|gul|gyth|hak|hoz|ik|j|jalath|jav|jidz|k|ka|kacht|kalak|kano|kat|kcha|keech|kek|kik|kil|klak|klik|ko|kos|kreen|krik|kyor|la|laj|mma'ak|na|no|pak|pik|pok|pte|qhari|qhan|riik|sa|sed|si|t|ta|tak|tal|tek|tet|tho|thok|thri|tik|til|to|tohr|tok|trin|zer|zi)((ch|chk|dr|g|h|j|k|kl|kr|l|p|pt|t|th||)(ch|cht|k|kk|kt|l|rk|sn|t||)|(a|))(-|')(ak|al|cha|cho|chak|chka|chkit|dul|ez|hol|hoz|ik|jav|k|ka|kcha|kos|kwe|kyl|liscthk|nak|ndi|nik|riik|sa|sed|t|ta|tek|tet|tha|tich|tik|thok|tuk|tul|ts|ak|ch|cha|chak|chaka|chat|cheka|chil|chit|cho|chtik|chu|da|dasl|dej|dra|dre|drik|dul|g|gak|gul|gyth|hak|hoz|ik|j|jalath|jav|jidz|k|ka|kacht|kalak|kano|kat|kcha|keech|kek|kik|kil|klak|klik|ko|kos|kreen|krik|kyor|la|laj|mma'ak|na|no|pak|pik|pok|pte|qhari|qhan|riik|sa|sed|si|t|ta|tak|tal|tek|tet|tho|thok|thri|tik|til|to|tohr|tok|trin|zer|zi|((ch|chk|dr|g|h|j|k|kl|kr|l|p|pt|t|th)(ch|cht|k|kk|kt|l|rk|sn|t|)(a|)|(k)(k|t|ch|cht|l|)|(n|t|w)(|l|k))|)(-|'|)(ak|al|cha|cho|chak|chka|chkit|dul|ez|hol|hoz|ik|jav|k|ka|kcha|kos|kwe|kyl|liscthk|nak|ndi|nik|riik|sa|sed|t|ta|tek|tet|tha|tich|tik|thok|tuk|tul|ts|ak|ch|cha|chak|chaka|chat|cheka|chil|chit|cho|chtik|chu|da|dasl|dej|dra|dre|drik|dul|g|gak|gul|gyth|hak|hoz|ik|j|jalath|jav|jidz|k|ka|kacht|kalak|kano|kat|kcha|keech|kek|kik|kil|klak|klik|ko|kos|kreen|krik|kyor|la|laj|mma'ak|na|no|pak|pik|pok|pte|qhari|qhan|riik|sa|sed|si|t|ta|tak|tal|tek|tet|tho|thok|thri|tik|til|to|tohr|tok|trin|zer|zi|((ch|chk|dr|g|h|j|k|kl|kr|l|p|pt|t|th)<v>(ch|cht|k|kk|kt|l|rk|sn|t|)(a||)|(k)<v>(k|t|ch|cht|l|)|(n|t|w)<v>(|l|k)|(da|cha)|(ak|ch|cha|chak|chaka|chakak|chak'sa|chat|chatkcha|chil|cho|chtik|chtik-tek|chu|chuchaka|da|dasl|dej|dra|dra-trin|draj|dras|dre|dul|g|g'tok|g'tok-dra|g'tok-hoz|g'tokmma'ak|gak|gyth|gythka|gyth'sa|gythtik|haaz|haazik|hak|hoz|ik|iksed|ikriik|ikthok|ik-kos|j'ez|j'hol|jalath'gak|jav|Jeral|jidz|k|ka|kak|kalak|kaluk|kano|kcha|kek|kik|kil|kiltektet|klik|ko|kos|kos-r-iik|koskcha|kreen|kyor|kyorkcha|la|laj|lajav|lak|lakta-cho|liscthk|mma'ak|na|no|qhari|qhan-cho|riik|sa|si|si'tsa|sed|t'keech|ta|tek|tek-hoz|tekchakak|tekmma'ak|tet|tho|thok|thri|thri-kreen|thri-trin|tik|tik-dul|tik-tik|tikchak|tikik|to'ksa|tohr|tohr-kreen|tok|tokchak|tondi|trin|zer|zerka|zi|zik||zik-chil|zik-thok|zik-trin|zik-trin'ts|zik-trin'ak)|)|)">
-          thriKreen</option>
-        <option
-          value="!(eö|fëa|ae|am|an|ar|be|ca|ce|cu|cí|dae|de|dui|ecth|ed|eg|el|er|eä|fe|fi|ga|gi|gl|go|gw|ha|id|im|in|ir|le|li|lú|ma|mí|ne|ni|ol|or|pe|qu|ro|rú|sa|th|ta|tu|vo)(<v>)(|ai|ag|al|an|ar|bl|da|dh|di|dr|du|edh|eg|el|em|en|er|es|f|fi|fí|g|gl|gn|gr|gu|gw|ht|i|im|in|ing|l|la|ld|le|li|ll|ló|lg|m|ma|mi|ml|mo|mr|n|na|nd|ne|ng|nr|od|ol|or|ph|r|ran|rd|rel|ren|rf|rw|rg|ron|t|th|ta|u|ui)(<v>)(ad|an|as|ant|bor|d|dil|dor|el|en|er|g|hil|iel|ien|il|in|ion|ir|is|ië|kil|las|lin|më|mil|n|nd|nar|od|ol|on|or|orn|oth|odh|os|rim|rm|rë|rían|ros|s|th|të|ung|wë|yë|ír)">
-          Elven</option>
-        <option
-          value="!(ad|agr|aigr|airg|alf|alg|an|ar|arti|ath|av|bag|bak|bal|bal|bam|bhak|bha|bor|bor|both|bra|bro|dag|dal|dar|dav|dholm|dhurh|dhuz|dig|dil|div|dor|do|dour|doutr|drad|dram|dran|du|dug|dul|dum|dun|durt|dut|duv|dwok|dwomn|dw|fir|fir|for|fov|gart|gig|gir|glol|glond|glorg|glori|glort|god|gros|ha|harb|haz|herne|hok|horm|hou|khour|khub|kror|kug|lod|lord|loz|mal|mar|marg|mart|mat|math|mav|nuragn|ra|ralv|rar|reirg|rulv|run|rur|ruv|sakgr|salmu|sirsor|thagg|tha|the|tho|thraz|thufr|thutm|torem|ugno|werad|werazz|whuz|yatm|yurs)(adm|aggum|arh|de|dgro|dr|drum|dum|egno|eldr|emr|erl|fr|ga|gat|gir|gr|hol|mur|ndin|omm|oz|rgr|rorl|ru|st|sum|thuml|tro|ug|ulgar|unm|urh|zot|zu|||||||||||||||)(b|d|fr|g|h|l|m|r|s|t|v|z||||||||||||||||||||)(ac|ack|aed|aeg|aen|aic|am|ami|an|eal|ed|et|ick|ig|il|in|iol|ion|ir|li|mi|od|oki|ol|on|or|ot|oth|oud|ouk|oul|oum|ous|uc|uck|uk|um|un|ur||||||||||||||) !(ale|amber|anvil|ash|axe|axel|barrel|battle|beast|beryl|best|black|blessed|blood|blunt|bone|bottle|boulder|breast|brew|brick|bright|bristle|bronze|brown|broz|bung|cask|casket|cave|cavern|chain|chaos|clod|coal|coin|cold|copper|crag|day|deep|dhot|dim|dirt|drake|earth|ember|fiery|fire|flame|flask|flat|flint|forge|frost|gem|giant|gold|golden|granite|gravel|gray|great|grey|grim|grumble|hard|high|hill|hold|honor|ice|ingot|iron|jade|keg|krag|large|lava|long|magma|marble|melt|merry|metal|mine|mithril|mortar|mud|night|noble|oaken|oil|onyx|orc|order|ore|over|pewter|plate|platinum|rune|sapphire|shadow|shallow|shatter|short|silver|small|smelt|snow|soft|spark|steel|stone|tear|thunder|tile|tinkle|treasure|troll|twilight|under|war|ward|warm|whit|white|wide|wind|wold|wolf|worst|wraith|wyvern)(arm|armour|axe|back|bane|basher|beard|belly|bender|born|bow|braid|branch|brand|breaker|brew|brewer|bringer|brow|buckle|buster|chest|chim|chin|cloak|coat|delver|digger|druk|fall|finger|flayer|foot|forge|forged|fury|granite|grip|grog|guard|gut|hammer|hand|head|heart|heim|helm|hide|home|hood|horn|howl|jaw|lum|mace|mail|maker|mane|mantle|master|maul|miner|pike|river|rock|shaper|shoulder|spine|stone|stormthane|sunder|sword|tank|thane|view|zurum)">
-          Dwarven</option>
-        <option value="!BsV (the) !i">ThistheThat</option>
-        <option
-          value="!((Aba|Ada)|Abri|Af|(Ah|Ak)|Aliy|(Amm|An)|(Asa|Ash)|(Azar|Azi)|(Bah|Bey)|(Bal|Bil)|(Bam|Ben)|Bora|Char|Chet|Dah|(Dam|Din)|Dar|(Dauw|Dav)|(Del|Dil)|Ebu|(Eh|Ej)|El|Erd|(Es|Ez)|Ett|Far|(Fay|Feh)|(Gab|Ghib)|Gelah|(Geza|Giz)|Ghay|(Ghul|Gol)|Gudah|(Hak|Hik)|(Ham|Han)|Hav|Hos|Hwah|Ibi|(Ik|Iq)|(Il|Iru)|Isa|(Jah|Juh)|(Jam|Jin)|(Kah|Khay)|(Kam|Kan)|(Kas|Khash)|Kata|Kav|Khozh|Kiah|Kud|(Lah|Lay)|(Mah|Mal)|Marti|(Mir|Mur)|(Miy|Muy)|Mozh|Mokh|Mus|Nah|Nil|Nur|(Oh|Os)|Par|(Qah|Quy)|Qis|(Rah|Reh)|(Ram|Rin)|Ras|Riy|(Riz|Rus)|(Rogh|Ruk)|(Roh|Ruy)|(Sa|Shah)|(Sab|Sob)|(Sad|Sidi)|(Saf|Shaf)|(Saj|Shez)|Salah|(Sam|Shems)|(Sav|Sep)|(Seno|Sim)|Shab|Sher|(Shiy|Siah)|(Shoh|Zoh)|Tab|(Tah|Taj)|(Tal|Taw)|(Tam|Tan)|Touf|(Ul|Urs)|Vah|Vish|(Vol|Wal)|(Was|Yas)|(Yaw|Yuh)|Yus|(Zar|Zur))(ad|aheh|aila|ajwanda|(al|alma)|ama|ansu|ashak|asip|astu|attin|atul|(auf|avra)|(aya|ayu)|ayati|bak|bar|bassu|besh|bil|biyya|(biz|borz)|bula|chin|dal|(dam|din)|(dar|dur)|dashir|dat|dela|(dha|di)|diga|dos|dra|edin|ehrdad|etis|evgi|evrim|ezu|fandi|(faq|fi q)|fari|fattin|fayda|fi f|fi kar|fi ya|fuz|gan|(geh|gi)|ges|(ghul|gol)|gib|gir|(hadi|hid)|hadur|(ham|hanna)|hasta|hattin|(hayeh|hia)|hevar|(hij|hiyya)|(him|hina)|hir|hita|(iar|iya)|(iba|ifa)|ideh|(iha|ik)|ija|ila|ima|ind|inshah|ir|(isa|izar)|(isha|isuh)|ishan|(jab|jep)|(jad|jod)|jah|jarat|jis|(ka|key)|kandr|khan|kila|(kim|kina)|(kir|kora)|kram|ku|kwar|(lad|led)|(lah|lu)|(lal|lil)|(lam|lim)|lanu|lebek|(lekha|liq)|lous|(mah|mi)|mal|man|(mar|meer)|mat|mayil|mayra|mid|mina|mira|(moud|mud)|murgh|naid|(nam|nan)|(nas|naz)|nat|(nay|ni)|nife|nis|noush|oku|(omer|on)|pur|qat|rab|ragim|(rah|ri)|(rak|rukh)|(ram|ran)|rash|razad|regan|(ret|rud)|reyya|rian|riar|rifa|rij|(rim|rin)|(sal|sul)|(sama|san)|(sar|sir)|say|sayba|settin|(shad|shid)|(sham|shan)|shayr|sida|sif|(sim|suma)|siya|smet|sut|tach|tada|takhar|tam|tar|tasim|tau|taya|taza|temiz|tib|tros|tul|tunis|ud|ufar|uhsin|uwa|uzah|va|(van|vin)|vare|varid|vash|(vid|vizh)|viya|wa|wahir|wajit|wana|war|yaddin|(yal|yol)|(yam|yun)|yamin|yas|yub|za|zade|(zam|zan)|(zar|zur)|zet|zhang|ziya|zul) (<o> the|the) ((Accursed|Dread|Squamous|Unbearable|Void-Touched)|(All-Seeing|Omnipotent|Perceptive)|(Amber|Many-Coloured|Verdant)|(Ancient|August|Hoary|Old)|(Ardent|Bold|Burning|Imposing|Passionate|Stoic|Unwavering)|(Black|Dark|Ebon|Jet|Lightless|Obscured|Shadowy|Stygian)|(Beatific|Beauteous|Glorious|Most Excellent|Peerless|Virtuous)|(Benevolent|Celestial|Sagacious|Supreme|Transcendent|Wise)|(Blasphemous|Evil|False|Lawless|Masterless|Unburdened|Unruled|Bloody|Crimson|Maroon|Red|Rosy|Scarlet|Vermillion)|(Deathless|Eternal|Illustrious|Magnificent|Merciful/-less)|(Desired|Serene|Sublime)|(Diseased|Pale|Pallid|Sallow|Sick)|(Enchanter/-ress|Magical|Sorcerous)|(Exalted|Incomparable|Infinite|Remote|True|Unapproachable)|(Golden|Iridescent|Polished|Radiant|Reflecting|Silver)|(Heart of [(aspect|element|god|location|person)])|(Resplendent|Scintillating|Shimmering|Shining)|(Servant of [(demon|god|philosophy|principle)])|(Speaker of [(Doom|Ill Omens|Lies|Prophecy|Truth)]))">
-          Wizard Names</option>
-      </select>
-      <input type="text" id="spec" value="!<s|B|Bv|v><V|s|'|V><s|V|C>" />
-      <button style="width:100%" onclick="update();" type="button">Generate From Formula</button>
-      <span style="display:inline-block; margin:5px; text-align:center; width:100%; color:black"><b>!</b> capitalize
-        <b>s</b> syllable <b>v</b> vowel <b>V</b> complex vowel <b>B</b> beginning consonant <b>C</b> complex consonant
-        <b>c</b> consonant <b>D</b> stupid consonant <b>d</b> stupid syllable <b>o</b> surname prefix <b>t</b> location
-        <b>i</b> insult <b>m</b> mushy <b>M</b> mushy suffix <b>(the)</b> the <b>n</b> Epithet 1 <b>N</b> Epithet 2
-        <b>|</b> or operator <b><</b> symbols <b>></b> <b>(</b> literal <b>)</b></span>
-      <select id="markovnames">
-        <option value="common">Common Names</option>
-        <option value="surnames">Surnames</option>
-        <option value="olde">Olde Names</option>
-        <option value="oldesur">Olde Surnames</option>
-        <option value="latin">Latin Names</option>
-        <option value="spartan">Spartan Names</option>
-        <option value="athens">Athens Names</option>
-        <option value="native">Native Names</option>
-        <option value="egyptian">Egyptian Names</option>
-        <option value="hindi">Hindi Names</option>
-        <option value="sumerian">Sumer Names</option>
-        <option value="norse">Norse Names</option>
-        <option value="chinese">Chinese Names</option>
-        <option value="russian">Russian Names</option>
-        <option value="african">African Names</option>
-        <option value="aboriginal">Aboriginal Names</option>
-        <option value="dwarf">Dwarf Names</option>
-        <option value="elven">Elven Names</option>
-        <option value="dragon">Dragon Names</option>
-        <option value="wizard">Wizard Names</option>
-        <option value="name1">Adjective Names</option>
-        <option value="name2">Noun Names</option>
-        <option value="colorList">Colors</option>
-        <option value="diety1">TN Gods</option>
-        <option value="diety2">NG Gods</option>
-        <option value="diety3">NE Gods</option>
-        <option value="diety4">LG Gods</option>
-        <option value="diety5">LN Gods</option>
-        <option value="diety6">LE Gods</option>
-        <option value="diety7">CG Gods</option>
-        <option value="diety8">CN Gods</option>
-        <option value="diety9">CE Gods</option>
-        <option value="diety0">Demon Names</option>
-        <option value="newNames">Cached Names</option>
-      </select>
-      <select style="width:25%;" id="targetNum">
-        <option value="30">30</option>
-        <option value="29">29</option>
-        <option value="28">28</option>
-        <option value="27">27</option>
-        <option value="26">26</option>
-        <option value="25">25</option>
-        <option value="24">24</option>
-        <option value="23">23</option>
-        <option value="22">22</option>
-        <option value="21">21</option>
-        <option value="20">20</option>
-        <option value="19">19</option>
-        <option value="18">18</option>
-        <option value="17">17</option>
-        <option value="16">16</option>
-        <option value="15">15</option>
-        <option value="14">14</option>
-        <option value="13">13</option>
-        <option value="12">12</option>
-        <option value="11">11</option>
-        <option value="10">10</option>
-        <option value="9">9</option>
-        <option value="8">8</option>
-        <option value="7">7</option>
-        <option value="6">6</option>
-        <option value="5">5</option>
-        <option value="4">4</option>
-        <option value="3">3</option>
-        <option value="2">2</option>
-        <option value="1">1</option>
-      </select><button style="width:25%" onclick="orig_names(document.getElementById('markovnames').value);"
-        type="button">Random Name</button><button style="width:25%"
-        onclick="more_names(document.getElementById('markovnames').value);" type="button">Remixed Name</button><button
-        style="width:25%" onclick="remix_names();" type="button">Remix Below</button>
-      <button style="width:100%" onclick="reset_names();" type="button">Reset</button>
-      <textarea id="seedGenerator" rows="10"></textarea>
+  <form>
+    <div class="form-group">
+      <input style="width:50%" onclick="this.value = stateDays()" name="days" id="days" type="text"
+        placeholder="current day number" readonly>
+      <input style="width:49.5%" onchange="this.previousElementSibling.value = stateDays(this.value)" name="offset"
+        id="offset" type="number" placeholder="offset current day number">
+    </div>
+    <div>
+      <hr>
+    </div>
+    <div id="countbox"><span id="count"></span> Name Generator: <b>!</b> capitalize <b>s</b> syllable <b>v</b> vowel <b>V</b> complex vowel <b>B</b> beginning consonant <b>C</b> complex consonant <b>c</b> consonant <b>D</b> stupid consonant <b>d</b> stupid syllable <b>o</b> surname prefix <b>t</b> location <b>i</b> insult <b>m</b> mushy <b>M</b> mushy suffix <b>(the)</b> the <b>n</b> Epithet 1 <b>N</b> Epithet 2 <b>|</b> or operator <b><</b> symbols <b>></b> <b>(</b> literal <b>)</b></div>
+    <textarea id="seedGenerator" rows="6"></textarea>
+    <input type="text" id="spec" value="!<s|B|Bv|v><V|s|'|V><s|V|C>" />
+    <select style="width:25%;" id="targetNum">
+      <option value="30">30</option>
+      <option value="29">29</option>
+      <option value="28">28</option>
+      <option value="27">27</option>
+      <option value="26">26</option>
+      <option value="25">25</option>
+      <option value="24">24</option>
+      <option value="23">23</option>
+      <option value="22">22</option>
+      <option value="21">21</option>
+      <option value="20">20</option>
+      <option value="19">19</option>
+      <option value="18">18</option>
+      <option value="17">17</option>
+      <option value="16">16</option>
+      <option value="15">15</option>
+      <option value="14">14</option>
+      <option value="13">13</option>
+      <option value="12">12</option>
+      <option value="11">11</option>
+      <option value="10">10</option>
+      <option value="9">9</option>
+      <option value="8">8</option>
+      <option value="7">7</option>
+      <option value="6">6</option>
+      <option value="5">5</option>
+      <option value="4">4</option>
+      <option value="3">3</option>
+      <option value="2">2</option>
+      <option value="1">1</option>
+    </select><button style="width:25%" onclick="orig_names(document.getElementById('markovnames').value);"
+      type="button">Random Name</button><button style="width:25%"
+      onclick="more_names(document.getElementById('markovnames').value);" type="button">Remixed Name</button><button
+      style="width:25%" onclick="remix_names();" type="button">Remix Existing</button>
+    <select style="width:50%" onchange="setIt(document.getElementById('preconfig').value);" id="preconfig">
+      <option value="!<s|B|Bv|v><V|s|'|V><s|V|C>">Default Formula</option>
+      <option
+        value="!((anvil|ash|axe|beggar’s|boat|bridge|castle|clear|coal|court|crest|crown|crystal|dark|death|deer|doom|dry|east|falcon|fall|fair|far|fire|fool’s|frey|frost|gloom|hammer|helm|hill|hogs|holly|hull|ice|iron|island|lake|lion|little|lone|meadow|mine|murk|new|north|oak|old|port|queens|rams|river|rock|rose|sea|shade|shepherd’s|shield|ship’s|snow|south|spear|spring|starry|storm|stone|summer|sword|vandal|wander|wave|well|west|willow|wind|winter|witch|wolf)|(atel|atol|bend|borne|borough|break|bridge|burn|castle|caster|cliff|coast|crest|croft|crown|dale|deep|den|edge|end|fall|falls|fell|feet|field|flower|ford|forge|fort|garden|glen|guard|gulch|haven|heart|heim|hill|hold|hole|hollow|horn|inn|islands|keep|land|lands|leaf|lock|march|marches|mead|meadow|meet|mere|mill|moor|mouth|outpost|pass|pool|ran|rest|ridge|roost|shield|shire|shore|side|spring|stone|ton|town|vale|wall|watch|water|wend|well|wick|wold|wood|worth))((atel|atol|bay|bend|borne|borough|break|bridge|burn|castle|caster|cliff|coast|crest|croft|crown|dale|deep|den|edge|end|fall|falls|fell|feet|field|flower|ford|forge|fort|garden|glade|glen|guard|gulch|haven|heart|heim|hill|hold|hole|hollow|horn|inn|islands|keep|land|lands|leaf|lock|march|marches|mead|meadow|meet|mere|mill|moor|mouth|outpost|pass|pool|ran|rest|ridge|roost|shield|shire|shore|side|spring|stone|ton|town|vale|wall|watch|water|wend|well|wick|wold|wood|worth)|((<v>r|ae|ang|ara|az|br|cal|car|ch|cor|cull|da|d<v>m|d<v>n|d<v>r|drac|ed|er|est|even|gon|gul|h<v>l|har|l<v>n|lui|mul|r<v>s|ray|ril|sher')(<v>|<v>d|a|b<v>|c<v>|d<v>|ess|h<v>|j<v>|l<v>|m<v>|on|or|s<v>|t<v>|)(<v|V>n|<v|V>r|<v|V>th|and|andia|ania|ara|as|ast|atel|atia|atol|bia|b<V>ra|cara|caria|d<v>r|dara|daria|den|dim|dolan|dol<V>n|dor|doria|ee|enta|entia|gar|gin|had|iand|iara|idara|idim|idol<V>n|inia|iora|lad|lan|ley|lie|mar|myr|myria|nara|naria|nath|natia|nen|nolan|nta|nt<V>|onia|patia|phar|phatia|r|r<v|V>th|rand|ren|ria|ril|rill|rua|ryn|tan|tar|tia|ton|tria|waith|wyn)))">
+        Places</option>
+      <option value="!<V|B><V|vs|Vs>">Short</option>
+      <option value="!<i|Cd|D><d|i>">Idiot</option>
+      <option value="!<D|i><i|d>">Dumb</option>
+      <option value="!<i|s>v(mon|chu|zard|rtle|vee|lax|to|gar|chomp|puff|ander|uck|arp|peon|pod|saur|owth|cham|ceon)">
+        Pokemon</option>
+      <option value="!<<s|ss>|<VC|vC|B|BVs|Vs>><v|V|v|<v(l|n|r)|vc>>(th)">Dragon Pern</option>
+      <option
+        value="!((<B>|s|h|ty|ph|r|)(i|ae|ya|ae|eu|ia|i|eo|ai|a))(lo|la|sri|da|dai|the|sty|lae|due|li|lly|ri|na|ral|sur|rith)(|(su|nu|sti|llo|ria|))(|(n|ra|p|m|lis|cal|deu|dil|suir|phos|ru|dru|rin|raap|rgue))">
+        Fantasy 1</option>
+      <option
+        value="!(cham|chan|jisk|lis|frich|isk|lass|mind|sond|sund|ass|chad|lirt|und|mar|lis|il|<BVC>)(jask|ast|ista|adar|irra|im|ossa|assa|osia|ilsa|<vCv>)(|(an|ya|la|sta|sda|sya|st|nya))">
+        Fantasy 2</option>
+      <option
+        value="!(ch|ch’t|sh|cal|val|ell|har|shar|shal|rel|laen|ral|jh’t|alr|ch|ch’t|av)(|(is|al|ow|ish|ul|el|ar|iel))(aren|aeish|aith|even|adur|ulash|alith|atar|aia|erin|aera|ael|ira|iel|ahur|ishul)">
+        Fantasy 3</option>
+      <option
+        value="!(ethr|qil|mal|er|eal|far|fil|fir|ing|ind|il|lam|quel|quar|quan|qar|pal|mal|yar|um|ard|enn|ey)(|(<vc>|on|us|un|ar|as|en|ir|ur|at|ol|al|an))(uard|wen|arn|on|il|ie|on|iel|rion|rian|an|ista|rion|rian|cil|mol|yon)">
+        Fantasy 4</option>
+      <option
+        value="!(taith|kach|chak|kank|kjar|rak|kan|kaj|tach|rskal|kjol|jok|jor|jad|kot|kon|knir|kror|kol|tul|rhaok|rhak|krol|jan|kag|ryr)(<vc>|in|or|an|ar|och|un|mar|yk|ja|arn|ir|ros|ror)(|(mund|ard|arn|karr|chim|kos|rir|arl|kni|var|an|in|ir|a|i|as))">
+        Fantasy 5</option>
+      <option
+        value="!(aj|ch|etz|etzl|tz|kal|gahn|kab|aj|izl|ts|jaj|lan|kach|chaj|qaq|jol|ix|az|biq|nam)(|(<vc>|aw|al|yes|il|ay|en|tom||oj|im|ol|aj|an|as))(aj|am|al|aqa|ende|elja|ich|ak|ix|in|ak|al|il|ek|ij|os|al|im)">
+        Fantasy 6</option>
+      <option
+        value="!(yi|shu|a|be|na|chi|cha|cho|ksa|yi|shu)(th|dd|jj|sh|rr|mk|n|rk|y|jj|th)(us|ash|eni|akra|nai|ral|ect|are|el|urru|aja|al|uz|ict|arja|ichi|ural|iru|aki|esh)">
+        Fantasy 7</option>
+      <option
+        value="!(syth|sith|srr|sen|yth|ssen|then|fen|ssth|kel|syn|est|bess|inth|nen|tin|cor|sv|iss|ith|sen|slar|ssil|sthen|svis|s|ss|s|ss)(|(tys|eus|yn|of|es|en|ath|elth|al|ell|ka|ith|yrrl|is|isl|yr|ast|iy))(us|yn|en|ens|ra|rg|le|en|ith|ast|zon|in|yn|ys)">
+        Fantasy 8</option>
+      <option value="!<s<v|V>(tia)|s<v|V>(os)|B<v|V>c(ios)|B<v|V><c|C>v(ios|os)>">Greek</option>
+      <option
+        value="!((||||||||A|Uru|Géme|Lú|Mag|Nig|Shesh|Nin|Me|E|Bau|Arad|Akad|Asad|)(s|c))(||||||||kala|egi|damu|lugal|sheg|nanna|dari|ninni|etil|anki|bau|tuda|silim|harra|shen|arra|risa)(|ar|iz|re|sa)">
+        Sumerian</option>
+      <option value="!sv(nia|lia|cia|sia)">Old Latin Place</option>
+      <option
+        value="!((h|k|l|m|n|p|w|')|)(a|e|i|o|u)((h|k|l|m|n|p|w|')|)(a|e|i|o|u)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)(((h|k|l|m|n|p|w|')|)(a|e|i|o|u)|)">
+        Hawaiian 1</option>
+      <option
+        value="!((h|k|l|m|n|p|w|)(a|e|i|o|u|a'|e'|i'|o'|u'|ae|ai|ao|au|oi|ou|eu|ei)(k|l|m|n|p|)|)(h|k|l|m|n|p|w|)(a|e|i|o|u|a'|e'|i'|o'|u'|ae|ai|ao|au|oi|ou|eu|ei)(k|l|m|n|p|)">
+        Hawaiian 2</option>
+      <option
+        value="!(aka|aki|bashi|gawa|kawa|furu|fuku|fuji|hana|hara|haru|hashi|hira|hon|hoshi|ichi|iwa|kami|kawa|ki|kita|kuchi|kuro|marui|matsu|miya|mori|moto|mura|nabe|naka|nishi|no|da|ta|o|oo|oka|saka|saki|sawa|shita|shima|i|suzu|taka|take|to|toku|toyo|ue|wa|wara|wata|yama|yoshi|kei|ko|zawa|zen|sen|ao|gin|kin|ken|shiro|zaki|yuki|asa)(||||||||||bashi|gawa|kawa|furu|fuku|fuji|hana|hara|haru|hashi|hira|hon|hoshi|chi|wa|ka|kami|kawa|ki|kita|kuchi|kuro|marui|matsu|miya|mori|moto|mura|nabe|naka|nishi|no|da|ta|o|oo|oka|saka|saki|sawa|shita|shima|suzu|taka|take|to|toku|toyo|ue|wa|wara|wata|yama|yoshi|kei|ko|zawa|zen|sen|ao|gin|kin|ken|shiro|zaki|yuki|sa)">
+        Japanese 1</option>
+      <option
+        value="!((a|i|u|e|o|||||)(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo))(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)(|(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)|(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)(|(ka|ki|ki|ku|ku|ke|ke|ko|ko|sa|sa|sa|shi|shi|shi|su|su|se|so|ta|ta|chi|chi|tsu|te|to|na|ni|ni|nu|nu|ne|no|no|ha|hi|fu|fu|he|ho|ma|ma|ma|mi|mi|mi|mu|mu|mu|mu|me|mo|mo|mo|ya|yu|yu|yu|yo|ra|ra|ra|ri|ru|ru|ru|re|ro|ro|ro|wa|wa|wa|wa|wo|wo)))(|||n)">
+        Japanese 2</option>
+      <option
+        value="!(zh|x|q|sh|h)(ao|ian|uo|ou|ia)(|(l|w|c|p|b|m)(ao|ian|uo|ou|ia)(|n)|-(l|w|c|p|b|m)(ao|ian|uo|ou|ia)(|(d|j|q|l)(a|ai|iu|ao|i)))">
+        Chinese</option>
+      <option
+        value="!(ak|ch|cha|chak|chaka|chat|cheka|chil|chit|cho|chtik|chu|da|dasl|dej|dra|dre|drik|dul|g|gak|gul|gyth|hak|hoz|ik|j|jalath|jav|jidz|k|ka|kacht|kalak|kano|kat|kcha|keech|kek|kik|kil|klak|klik|ko|kos|kreen|krik|kyor|la|laj|mma'ak|na|no|pak|pik|pok|pte|qhari|qhan|riik|sa|sed|si|t|ta|tak|tal|tek|tet|tho|thok|thri|tik|til|to|tohr|tok|trin|zer|zi)((ch|chk|dr|g|h|j|k|kl|kr|l|p|pt|t|th||)(ch|cht|k|kk|kt|l|rk|sn|t||)|(a|))(-|')(ak|al|cha|cho|chak|chka|chkit|dul|ez|hol|hoz|ik|jav|k|ka|kcha|kos|kwe|kyl|liscthk|nak|ndi|nik|riik|sa|sed|t|ta|tek|tet|tha|tich|tik|thok|tuk|tul|ts|ak|ch|cha|chak|chaka|chat|cheka|chil|chit|cho|chtik|chu|da|dasl|dej|dra|dre|drik|dul|g|gak|gul|gyth|hak|hoz|ik|j|jalath|jav|jidz|k|ka|kacht|kalak|kano|kat|kcha|keech|kek|kik|kil|klak|klik|ko|kos|kreen|krik|kyor|la|laj|mma'ak|na|no|pak|pik|pok|pte|qhari|qhan|riik|sa|sed|si|t|ta|tak|tal|tek|tet|tho|thok|thri|tik|til|to|tohr|tok|trin|zer|zi|((ch|chk|dr|g|h|j|k|kl|kr|l|p|pt|t|th)(ch|cht|k|kk|kt|l|rk|sn|t|)(a|)|(k)(k|t|ch|cht|l|)|(n|t|w)(|l|k))|)(-|'|)(ak|al|cha|cho|chak|chka|chkit|dul|ez|hol|hoz|ik|jav|k|ka|kcha|kos|kwe|kyl|liscthk|nak|ndi|nik|riik|sa|sed|t|ta|tek|tet|tha|tich|tik|thok|tuk|tul|ts|ak|ch|cha|chak|chaka|chat|cheka|chil|chit|cho|chtik|chu|da|dasl|dej|dra|dre|drik|dul|g|gak|gul|gyth|hak|hoz|ik|j|jalath|jav|jidz|k|ka|kacht|kalak|kano|kat|kcha|keech|kek|kik|kil|klak|klik|ko|kos|kreen|krik|kyor|la|laj|mma'ak|na|no|pak|pik|pok|pte|qhari|qhan|riik|sa|sed|si|t|ta|tak|tal|tek|tet|tho|thok|thri|tik|til|to|tohr|tok|trin|zer|zi|((ch|chk|dr|g|h|j|k|kl|kr|l|p|pt|t|th)<v>(ch|cht|k|kk|kt|l|rk|sn|t|)(a||)|(k)<v>(k|t|ch|cht|l|)|(n|t|w)<v>(|l|k)|(da|cha)|(ak|ch|cha|chak|chaka|chakak|chak'sa|chat|chatkcha|chil|cho|chtik|chtik-tek|chu|chuchaka|da|dasl|dej|dra|dra-trin|draj|dras|dre|dul|g|g'tok|g'tok-dra|g'tok-hoz|g'tokmma'ak|gak|gyth|gythka|gyth'sa|gythtik|haaz|haazik|hak|hoz|ik|iksed|ikriik|ikthok|ik-kos|j'ez|j'hol|jalath'gak|jav|Jeral|jidz|k|ka|kak|kalak|kaluk|kano|kcha|kek|kik|kil|kiltektet|klik|ko|kos|kos-r-iik|koskcha|kreen|kyor|kyorkcha|la|laj|lajav|lak|lakta-cho|liscthk|mma'ak|na|no|qhari|qhan-cho|riik|sa|si|si'tsa|sed|t'keech|ta|tek|tek-hoz|tekchakak|tekmma'ak|tet|tho|thok|thri|thri-kreen|thri-trin|tik|tik-dul|tik-tik|tikchak|tikik|to'ksa|tohr|tohr-kreen|tok|tokchak|tondi|trin|zer|zerka|zi|zik||zik-chil|zik-thok|zik-trin|zik-trin'ts|zik-trin'ak)|)|)">
+        thriKreen</option>
+      <option
+        value="!(eö|fëa|ae|am|an|ar|be|ca|ce|cu|cí|dae|de|dui|ecth|ed|eg|el|er|eä|fe|fi|ga|gi|gl|go|gw|ha|id|im|in|ir|le|li|lú|ma|mí|ne|ni|ol|or|pe|qu|ro|rú|sa|th|ta|tu|vo)(<v>)(|ai|ag|al|an|ar|bl|da|dh|di|dr|du|edh|eg|el|em|en|er|es|f|fi|fí|g|gl|gn|gr|gu|gw|ht|i|im|in|ing|l|la|ld|le|li|ll|ló|lg|m|ma|mi|ml|mo|mr|n|na|nd|ne|ng|nr|od|ol|or|ph|r|ran|rd|rel|ren|rf|rw|rg|ron|t|th|ta|u|ui)(<v>)(ad|an|as|ant|bor|d|dil|dor|el|en|er|g|hil|iel|ien|il|in|ion|ir|is|ië|kil|las|lin|më|mil|n|nd|nar|od|ol|on|or|orn|oth|odh|os|rim|rm|rë|rían|ros|s|th|të|ung|wë|yë|ír)">
+        Elven</option>
+      <option
+        value="!(ad|agr|aigr|airg|alf|alg|an|ar|arti|ath|av|bag|bak|bal|bal|bam|bhak|bha|bor|bor|both|bra|bro|dag|dal|dar|dav|dholm|dhurh|dhuz|dig|dil|div|dor|do|dour|doutr|drad|dram|dran|du|dug|dul|dum|dun|durt|dut|duv|dwok|dwomn|dw|fir|fir|for|fov|gart|gig|gir|glol|glond|glorg|glori|glort|god|gros|ha|harb|haz|herne|hok|horm|hou|khour|khub|kror|kug|lod|lord|loz|mal|mar|marg|mart|mat|math|mav|nuragn|ra|ralv|rar|reirg|rulv|run|rur|ruv|sakgr|salmu|sirsor|thagg|tha|the|tho|thraz|thufr|thutm|torem|ugno|werad|werazz|whuz|yatm|yurs)(adm|aggum|arh|de|dgro|dr|drum|dum|egno|eldr|emr|erl|fr|ga|gat|gir|gr|hol|mur|ndin|omm|oz|rgr|rorl|ru|st|sum|thuml|tro|ug|ulgar|unm|urh|zot|zu|||||||||||||||)(b|d|fr|g|h|l|m|r|s|t|v|z||||||||||||||||||||)(ac|ack|aed|aeg|aen|aic|am|ami|an|eal|ed|et|ick|ig|il|in|iol|ion|ir|li|mi|od|oki|ol|on|or|ot|oth|oud|ouk|oul|oum|ous|uc|uck|uk|um|un|ur||||||||||||||) !(ale|amber|anvil|ash|axe|axel|barrel|battle|beast|beryl|best|black|blessed|blood|blunt|bone|bottle|boulder|breast|brew|brick|bright|bristle|bronze|brown|broz|bung|cask|casket|cave|cavern|chain|chaos|clod|coal|coin|cold|copper|crag|day|deep|dhot|dim|dirt|drake|earth|ember|fiery|fire|flame|flask|flat|flint|forge|frost|gem|giant|gold|golden|granite|gravel|gray|great|grey|grim|grumble|hard|high|hill|hold|honor|ice|ingot|iron|jade|keg|krag|large|lava|long|magma|marble|melt|merry|metal|mine|mithril|mortar|mud|night|noble|oaken|oil|onyx|orc|order|ore|over|pewter|plate|platinum|rune|sapphire|shadow|shallow|shatter|short|silver|small|smelt|snow|soft|spark|steel|stone|tear|thunder|tile|tinkle|treasure|troll|twilight|under|war|ward|warm|whit|white|wide|wind|wold|wolf|worst|wraith|wyvern)(arm|armour|axe|back|bane|basher|beard|belly|bender|born|bow|braid|branch|brand|breaker|brew|brewer|bringer|brow|buckle|buster|chest|chim|chin|cloak|coat|delver|digger|druk|fall|finger|flayer|foot|forge|forged|fury|granite|grip|grog|guard|gut|hammer|hand|head|heart|heim|helm|hide|home|hood|horn|howl|jaw|lum|mace|mail|maker|mane|mantle|master|maul|miner|pike|river|rock|shaper|shoulder|spine|stone|stormthane|sunder|sword|tank|thane|view|zurum)">
+        Dwarven</option>
+      <option value="!BsV (the) !i">ThistheThat</option>
+      <option
+        value="!((Aba|Ada)|Abri|Af|(Ah|Ak)|Aliy|(Amm|An)|(Asa|Ash)|(Azar|Azi)|(Bah|Bey)|(Bal|Bil)|(Bam|Ben)|Bora|Char|Chet|Dah|(Dam|Din)|Dar|(Dauw|Dav)|(Del|Dil)|Ebu|(Eh|Ej)|El|Erd|(Es|Ez)|Ett|Far|(Fay|Feh)|(Gab|Ghib)|Gelah|(Geza|Giz)|Ghay|(Ghul|Gol)|Gudah|(Hak|Hik)|(Ham|Han)|Hav|Hos|Hwah|Ibi|(Ik|Iq)|(Il|Iru)|Isa|(Jah|Juh)|(Jam|Jin)|(Kah|Khay)|(Kam|Kan)|(Kas|Khash)|Kata|Kav|Khozh|Kiah|Kud|(Lah|Lay)|(Mah|Mal)|Marti|(Mir|Mur)|(Miy|Muy)|Mozh|Mokh|Mus|Nah|Nil|Nur|(Oh|Os)|Par|(Qah|Quy)|Qis|(Rah|Reh)|(Ram|Rin)|Ras|Riy|(Riz|Rus)|(Rogh|Ruk)|(Roh|Ruy)|(Sa|Shah)|(Sab|Sob)|(Sad|Sidi)|(Saf|Shaf)|(Saj|Shez)|Salah|(Sam|Shems)|(Sav|Sep)|(Seno|Sim)|Shab|Sher|(Shiy|Siah)|(Shoh|Zoh)|Tab|(Tah|Taj)|(Tal|Taw)|(Tam|Tan)|Touf|(Ul|Urs)|Vah|Vish|(Vol|Wal)|(Was|Yas)|(Yaw|Yuh)|Yus|(Zar|Zur))(ad|aheh|aila|ajwanda|(al|alma)|ama|ansu|ashak|asip|astu|attin|atul|(auf|avra)|(aya|ayu)|ayati|bak|bar|bassu|besh|bil|biyya|(biz|borz)|bula|chin|dal|(dam|din)|(dar|dur)|dashir|dat|dela|(dha|di)|diga|dos|dra|edin|ehrdad|etis|evgi|evrim|ezu|fandi|(faq|fi q)|fari|fattin|fayda|fi f|fi kar|fi ya|fuz|gan|(geh|gi)|ges|(ghul|gol)|gib|gir|(hadi|hid)|hadur|(ham|hanna)|hasta|hattin|(hayeh|hia)|hevar|(hij|hiyya)|(him|hina)|hir|hita|(iar|iya)|(iba|ifa)|ideh|(iha|ik)|ija|ila|ima|ind|inshah|ir|(isa|izar)|(isha|isuh)|ishan|(jab|jep)|(jad|jod)|jah|jarat|jis|(ka|key)|kandr|khan|kila|(kim|kina)|(kir|kora)|kram|ku|kwar|(lad|led)|(lah|lu)|(lal|lil)|(lam|lim)|lanu|lebek|(lekha|liq)|lous|(mah|mi)|mal|man|(mar|meer)|mat|mayil|mayra|mid|mina|mira|(moud|mud)|murgh|naid|(nam|nan)|(nas|naz)|nat|(nay|ni)|nife|nis|noush|oku|(omer|on)|pur|qat|rab|ragim|(rah|ri)|(rak|rukh)|(ram|ran)|rash|razad|regan|(ret|rud)|reyya|rian|riar|rifa|rij|(rim|rin)|(sal|sul)|(sama|san)|(sar|sir)|say|sayba|settin|(shad|shid)|(sham|shan)|shayr|sida|sif|(sim|suma)|siya|smet|sut|tach|tada|takhar|tam|tar|tasim|tau|taya|taza|temiz|tib|tros|tul|tunis|ud|ufar|uhsin|uwa|uzah|va|(van|vin)|vare|varid|vash|(vid|vizh)|viya|wa|wahir|wajit|wana|war|yaddin|(yal|yol)|(yam|yun)|yamin|yas|yub|za|zade|(zam|zan)|(zar|zur)|zet|zhang|ziya|zul) (<o> the|the) ((Accursed|Dread|Squamous|Unbearable|Void-Touched)|(All-Seeing|Omnipotent|Perceptive)|(Amber|Many-Coloured|Verdant)|(Ancient|August|Hoary|Old)|(Ardent|Bold|Burning|Imposing|Passionate|Stoic|Unwavering)|(Black|Dark|Ebon|Jet|Lightless|Obscured|Shadowy|Stygian)|(Beatific|Beauteous|Glorious|Most Excellent|Peerless|Virtuous)|(Benevolent|Celestial|Sagacious|Supreme|Transcendent|Wise)|(Blasphemous|Evil|False|Lawless|Masterless|Unburdened|Unruled|Bloody|Crimson|Maroon|Red|Rosy|Scarlet|Vermillion)|(Deathless|Eternal|Illustrious|Magnificent|Merciful/-less)|(Desired|Serene|Sublime)|(Diseased|Pale|Pallid|Sallow|Sick)|(Enchanter/-ress|Magical|Sorcerous)|(Exalted|Incomparable|Infinite|Remote|True|Unapproachable)|(Golden|Iridescent|Polished|Radiant|Reflecting|Silver)|(Heart of [(aspect|element|god|location|person)])|(Resplendent|Scintillating|Shimmering|Shining)|(Servant of [(demon|god|philosophy|principle)])|(Speaker of [(Doom|Ill Omens|Lies|Prophecy|Truth)]))">
+        Wizard Names</option>
+    </select><select style="width:50%" id="markovnames">
+      <option value="common">Common Names</option>
+      <option value="surnames">Surnames</option>
+      <option value="olde">Olde Names</option>
+      <option value="oldesur">Olde Surnames</option>
+      <option value="latin">Latin Names</option>
+      <option value="spartan">Spartan Names</option>
+      <option value="athens">Athens Names</option>
+      <option value="native">Native Names</option>
+      <option value="egyptian">Egyptian Names</option>
+      <option value="hindi">Hindi Names</option>
+      <option value="sumerian">Sumer Names</option>
+      <option value="norse">Norse Names</option>
+      <option value="chinese">Chinese Names</option>
+      <option value="russian">Russian Names</option>
+      <option value="african">African Names</option>
+      <option value="aboriginal">Aboriginal Names</option>
+      <option value="dwarf">Dwarf Names</option>
+      <option value="elven">Elven Names</option>
+      <option value="dragon">Dragon Names</option>
+      <option value="wizard">Wizard Names</option>
+      <option value="name1">Adjective Names</option>
+      <option value="name2">Noun Names</option>
+      <option value="colorList">Colors</option>
+      <option value="diety1">TN Gods</option>
+      <option value="diety2">NG Gods</option>
+      <option value="diety3">NE Gods</option>
+      <option value="diety4">LG Gods</option>
+      <option value="diety5">LN Gods</option>
+      <option value="diety6">LE Gods</option>
+      <option value="diety7">CG Gods</option>
+      <option value="diety8">CN Gods</option>
+      <option value="diety9">CE Gods</option>
+      <option value="diety0">Demon Names</option>
+      <option value="newNames">Cached Names</option>
+    </select>
+    <button style="width:50%" onclick="update();" type="button">Generate From Formula</button><button style="width:50%" onclick="reset_names();" type="button">Reset</button>
   </div>
   <div id="npcSection" class="form-group">
     <hr>
   </div>
   <div class="form-group">
-    <input style="width:100%" type="text" id="NPCname" placeholder="NPC Name" />
+    <input style="width:100%" type="text" id="NPCname" placeholder="NPC/PC Name" />
     <select style="width:50%" id="NPCtier">
       <option value="random">Random Tier</option>
       <option value="0">Tier 0</option>
@@ -675,6 +540,25 @@
       style="width:50%" onclick="generatorPC()" type="button">Generate PC/NPC</button>
     <div id="field">
     </div>
+    <div class="form-group" id="NPCgenerated">
+    </div>
+    <div style="color:#666; text-align:right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
+        onClick="countUp()">Round</button></div>
+    <div id="chessmenbox">
+      <div class="chessmen">
+        <img onclick="addMarker('chess-pawn', '', '', 0)" src="svg/chess-pawn.svg" title="ADD BLACK PAWN"/>
+        <img onclick="addMarker('chess-rook', '', '', 0)" src="svg/chess-rook.svg" title="ADD BLACK ROOK"/>
+        <img onclick="addMarker('chess-knight', '', '', 0)" src="svg/chess-knight.svg" title="ADD BLACK KNIGHT"/>
+        <img onclick="addMarker('chess-bishop', '', '', 0)" src="svg/chess-bishop.svg" title="ADD BLACK BISHOP"/>
+        <img onclick="addMarker('chess-queen', '', '', 0)" src="svg/chess-queen.svg" title="ADD BLACK QUEEN"/>
+        <img onclick="addMarker('chess-king', '', '', 0)" src="svg/chess-king.svg" title="ADD BLACK KING"/>
+        <img onclick="addMarker('chess-circle', '', '', 0)" src="svg/chess-circle.svg" title="ADD CHECKER"/>
+        <img onclick="chessBoard()" src="svg/chess.svg" title="CHESS PIECES"/>
+        <img class="white" onclick="taflBoard()" src="svg/chess.svg" title="TAFL PIECES"/>
+        <img class="white" onclick="checkerBoard()" src="svg/chess-circle.svg" title="CHECKER PIECES"/>
+        <img onclick="clearChessboard()" src="svg/chess-board.svg" title="CLEAR BOARD"/>
+      </div>
+    </div>
     <table id="zones">
       <tbody>
         <tr>
@@ -693,37 +577,18 @@
         </tr>
       </tbody>
     </table>
-    <div class="chessmen">
-      <img onclick="addMarker('chess-pawn', '', '', 0)" src="svg/chess-pawn.svg" title="ADD BLACK PAWN"/>
-      <img onclick="addMarker('chess-rook', '', '', 0)" src="svg/chess-rook.svg" title="ADD BLACK ROOK"/>
-      <img onclick="addMarker('chess-knight', '', '', 0)" src="svg/chess-knight.svg" title="ADD BLACK KNIGHT"/>
-      <img onclick="addMarker('chess-bishop', '', '', 0)" src="svg/chess-bishop.svg" title="ADD BLACK BISHOP"/>
-      <img onclick="addMarker('chess-queen', '', '', 0)" src="svg/chess-queen.svg" title="ADD BLACK QUEEN"/>
-      <img onclick="addMarker('chess-king', '', '', 0)" src="svg/chess-king.svg" title="ADD BLACK KING"/>
-      <img onclick="addMarker('chess-circle', '', '', 0)" src="svg/chess-circle.svg" title="ADD CHECKER"/>
-      <img onclick="chessBoard()" src="svg/chess.svg" title="CHESS PIECES"/>
-      <img class="white" onclick="taflBoard()" src="svg/chess.svg" title="TAFL PIECES"/>
-      <img class="white" onclick="checkerBoard()" src="svg/chess-circle.svg" title="CHECKER PIECES"/>
-      <img onclick="clearChessboard()" src="svg/chess-board.svg" title="CLEAR BOARD"/>
-    </div>
-    <div class="form-group" id="NPCgenerated">
-    </div>
-    <div style="color:#666; text-align:right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
-        onClick="countUp()">Round</button></div>
-    <div style="color:black">Crossbow Bolts (20) 1 GP 1½ lb. | Arrows (20) 1 GP 1 lb. | Darts (20) 1 GP 5 lb. | Blowgun
-      Needles (50) 1 GP 1 lb. | 8 glugs to a gallon | 500 GP weight = 1 inventory slot | Add 1 Inventory slot per CON
-    </div>
-    <div style="color:black">Item Name - Quantity () Damaged [] Mastery • Attuned * | Search terms: *Entries, |GameRules, @Creatures,
-      •CreatureData, ?ItemData, #GP_cost, <#GP_cost_Max, #<#GP_cost_Range,>#ItemDescLengthMax</div>
-    <div style="color:black">Proficiency Bonus: T1:D4 | T2:D6 | T3:D8 | T4:D10 | Attunement: INT, WIS, CHA or CON (min 2
-      + tier) | (Languages) (Secret Language) (Magic Disciplines) (Snap Spell) (Prepared Spell) (Known Spell) (Proficiency) (Double Proficiency) (Ability) (Other Abilities) (Quirk)</div>
-    <div style="color:black">CTRL+SHIFT+S - Toggle Footer | CTRL+SHIFT+D - Clear Footer | CTRL+SHIFT+A - Toggle Dice Roller| CTRL+SHIFT+~ - Reset Dice Roller | CTRL+SHIFT+Q - Toggle Calculator | Numpad for Calc Input | Name Change Confirm - Enter | Press ADD Marker to store PC/NPC in page</div>
     <div id="costSection" class="form-group">
       <hr>
     </div>
     <div class="form-group">
-      <hr>
-      Turn Order Organizer, Party List, Hand of Fate, Character Import/Export, Notes, Plain-text Character Sheet
+      <div style="color:black">Crossbow Bolts (20) 1 GP 1½ lb. | Arrows (20) 1 GP 1 lb. | Darts (20) 1 GP 5 lb. | Blowgun
+        Needles (50) 1 GP 1 lb. | 8 glugs to a gallon | 500 GP weight = 1 inventory slot | Add 1 Inventory slot per CON
+      </div>
+      <div style="color:black">Item Name - Quantity () Damaged [] Mastery • Attuned * | Search terms: *Entries, |GameRules, @Creatures,
+        •CreatureData, ?ItemData, #GP_cost, <#GP_cost_Max, #<#GP_cost_Range,>#ItemDescLengthMax</div>
+      <div style="color:black">Proficiency Bonus: T1:D4 | T2:D6 | T3:D8 | T4:D10 | Attunement: INT, WIS, CHA or CON (min 2
+        + tier) | (Languages) (Secret Language) (Magic Disciplines) (Snap Spell) (Prepared Spell) (Known Spell) (Proficiency) (Double Proficiency) (Ability) (Other Abilities) (Quirk)</div>
+      <div style="color:black">CTRL+SHIFT+S - Toggle Footer | CTRL+SHIFT+D - Clear Footer | CTRL+SHIFT+A - Toggle Dice Roller| CTRL+SHIFT+~ - Reset Dice Roller | CTRL+SHIFT+Q - Toggle Calculator | Numpad for Calc Input | Name Change Confirm - Enter | Press ADD Marker to store PC/NPC in page</div>
     </div>
     <span style="display:inline-block; width:25%; height:100%; position:relative;">
       <a style="position:absolute; right:0; bottom:0; padding:10px;" onclick="addtoTurnOrder('empty')"
@@ -768,6 +633,131 @@
       <span onclick="saveTxt(this)"
         style="position:absolute; top:0; right:0; color:black; background-color:lightblue; padding:10px;"><img style="height:1em;" src="svg/floppy-disk.svg" /> Save Text</span>
     </span>
+  </div>
+  <div id="mythicSection" class="form-group">
+    <hr>
+  </div>
+  <div class="form-group">
+    <button style="width:33%" onclick="mythicGM(0)" type="button">Mythic</button>
+    <button style="width:33%" onclick="generateEvent(1)" type="button">Event</button>
+    <button style="width:33%" onclick="npcGenerate(0)" type="button">NPC Flavor</button>
+  </div>
+  <div class="form-group">
+    <input style="display:inline-block; width:89%" id="question" type="text" value=""
+      placeholder="Ask your Yes/No Question" />
+    <input style="display:inline-block; width:10%" id="manualNum" type="text" value="" placeholder="Manual Override" />
+  </div>
+  <div class="form-group">
+    <div style="text-align:center;" id="mythic" name="mythic">Ask with desired outcome in the affirmative</div>
+  </div>
+  <div style="display:inline-block; width:33%" class="form-group">
+    <label for="event">
+      Event Type:
+    </label>
+    <select id="event">
+      <option value="Standard">Standard</option>
+      <option value="Horror">Horror</option>
+      <option value="Adventure">Adventure</option>
+      <option value="Mystery">Mystery</option>
+      <option value="Social">Social</option>
+      <option value="Personal">Personal</option>
+      <option value="Epic">Epic</option>
+    </select>
+  </div>
+  <div style="display:inline-block; width:33%" class="form-group">
+    <label for="oddsOptions">
+      Set Odds
+    </label>
+    <select onchange="addToOdds(this.value)" id="oddsOptions">
+      <option value="Impossible">Impossible</option>
+      <option value="No Way">No Way</option>
+      <option value="Very Unlikely">Very Unlikely</option>
+      <option value="Unlikely">Unlikely</option>
+      <option value="Even Odds" selected>Even Odds</option>
+      <option value="Somewhat Likely">Somewhat Likely</option>
+      <option value="Likely">Likely</option>
+      <option value="Very Likely">Very Likely</option>
+      <option value="Nearly Certain">Nearly Certain</option>
+      <option value="Sure Thing">Sure Thing</option>
+    </select>
+  </div>
+  <div style="display:inline-block; width:33%" class="form-group">
+    <label for="rankOptions">
+      Set Rank/Chaos
+    </label>
+    <select onchange="addToRank(this.value)" id="rankOptions">
+      <option value="Miniscule">Miniscule</option>
+      <option value="Weak">Weak</option>
+      <option value="Low">Low</option>
+      <option value="Below Average">Below Average</option>
+      <option value="Average" selected>Average</option>
+      <option value="Above Average">Above Average</option>
+      <option value="High">High</option>
+      <option value="Exceptional">Exceptional</option>
+      <option value="Incredible">Incredible</option>
+      <option value="Awesome">Awesome</option>
+      <option value="Superhuman">Superhuman</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <input style="display:inline-block; width:49%" id="odds" type="text" value="" placeholder="Default: Even Odds 4"
+      readonly="readonly" />
+    <input style="display:inline-block; width:50%" id="rank" type="text" value="" placeholder="Default: Average 4"
+      readonly="readonly" />
+  </div>
+  <div id="itemSection" class="form-group">
+    <hr>
+  </div>
+  <div class="form-group">
+    <textarea id="itemIdea" name="itemIdea" rows="27"></textarea>
+  </div>
+  <div class="form-group">
+    <select style="width:33%" id="itemOptions">
+      <option value="Generic">Generic</option>
+      <option value="Generic Type">Generic Type</option>
+      <option value="Melee Weapon">Melee Weapon</option>
+      <option value="Ranged Weapon">Ranged Weapon</option>
+      <option value="Gun">Gun</option>
+      <option value="Trap">Trap</option>
+      <option value="Ammo">Ammo</option>
+      <option value="Bomb">Bomb</option>
+      <option value="Decoration">Decoration</option>
+      <option value="Clothing">Clothing</option>
+      <option value="Armor">Armor</option>
+      <option value="Shield">Shield</option>
+      <option value="Instrument">Instrument</option>
+      <option value="Tool">Tool</option>
+      <option value="Container">Container</option>
+      <option value="Food">Food</option>
+      <option value="Spell">Spell</option>
+      <option value="Disease">Disease</option>
+      <option value="Poison">Poison</option>
+      <option value="Potion">Potion</option>
+      <option value="Elixir">Elixir</option>
+      <option value="Treasure">Treasure</option>
+      <option value="Locale">Locale</option>
+      <option value="Connection">Connection</option>
+    </select>
+    <select style="width:33%" id="itemtype">
+      <option value="Random">Level?</option>
+      <option value="Shabby">Shabby</option>
+      <option value="Common">Common</option>
+      <option value="Uncommon">Uncommon</option>
+      <option value="Rare">Rare</option>
+      <option value="Epic">Epic</option>
+    </select>
+    <select style="width:33%" id="cursetype">
+      <option value="Random">Curse?</option>
+      <option value="Cursed">Cursed</option>
+      <option value="Not Cursed">Not Cursed</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <button style="width:33%"
+      onclick="makeItem(document.getElementById('itemOptions').options[document.getElementById('itemOptions').selectedIndex].text)"
+      type="button">Make Item</button>
+    <button style="width:33%" onclick="makeItem()" type="button">Random Item</button>
+    <button style="width:33%" onclick="speakOutput(curses,1)" type="button">Curse</button>
   </div>
   </form>
   <div id="mapSection" class="form-group">
@@ -1112,9 +1102,9 @@
     <a onclick="showRand(); return false;" href="#"><span>[Rand]</span></a>
   </div>
   <div class="footer accordion">
-    <label class="chessmen" id="openfooter"><img class="white" src="svg/arrow-down-to-square.svg" title="DICE ROLLER"/></label>
-    <label style="float:left" for="dice-box" class="read-more-trigger-dice chessmen"><img class="white" src="svg/dice.svg" title="DICE ROLLER"/></label>
-    <label style="float:left" for="calc-box" class="read-more-trigger-calc chessmen"><img class="white" src="svg/calculator.svg" title="CALCULATOR"/></label>
+    <label class="iconmen" id="openfooter"><img class="white" src="svg/arrow-down-to-square.svg" title="DICE ROLLER"/></label>
+    <label style="float:left" for="dice-box" class="read-more-trigger-dice iconmen"><img class="white" src="svg/dice.svg" title="DICE ROLLER"/></label>
+    <label style="float:left" for="calc-box" class="read-more-trigger-calc iconmen"><img class="white" src="svg/calculator.svg" title="CALCULATOR"/></label>
     <div id="footer" contenteditable="true">
     </div>
     <div>
