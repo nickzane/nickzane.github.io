@@ -16,6 +16,7 @@
 <body id="namesSection" class="main">
   <input type="checkbox" class="read-more-state-calc" id="calc-box">
   <input type="checkbox" class="read-more-state-dice" id="dice-box">
+  <input type="checkbox" id="darkModeToggle">
   <div class="read-more-wrap-calc">
     <div class="read-more-target-calc">
       <div class="output">
@@ -131,8 +132,7 @@
       <a href="#itemSection">Items</a>
       <a href="#mapSection">Map</a>
       <a href="javascript:startCount()">Countdown</a>
-      <select onchange="document.getElementById('timesUp').style.display = 'none'" style="width:7em; margin: 12px 16px;"
-        id="timerSet">
+      <select onchange="document.getElementById('timesUp').style.display='none'" id="timerSet">
         <option value="0">Timer</option>
         <option value="10">10 Secs</option>
         <option value="30">½ Min</option>
@@ -163,16 +163,13 @@
     </div>
     <div class="full-width-element">
       <input id="search" oninput="showList()" placeholder="Search for ability or item" />
-      <div style="color:black; background-color:white; overflow-y:scroll; display:hidden" id="results"></div>
+      <div id="results"></div>
     </div>
   </header>
   <div class="dialog-content">
   <form>
     <div class="form-group">
-      <input style="width:50%" onclick="this.value = stateDays()" name="days" id="days" type="text"
-        placeholder="current day number" readonly>
-      <input style="width:49.5%" onchange="this.previousElementSibling.value = stateDays(this.value)" name="offset"
-        id="offset" type="number" placeholder="offset current day number">
+      <input class="halfsies" onclick="this.value = stateDays()" name="days" id="days" type="text" placeholder="current day number" readonly><input class="halfsies" onchange="this.previousElementSibling.value = stateDays(this.value)" name="offset" id="offset" type="number" placeholder="offset current day number">
     </div>
     <div>
       <hr>
@@ -180,7 +177,7 @@
     <div id="countbox"><span id="count"></span> Name Generator: <b>!</b> capitalize <b>s</b> syllable <b>v</b> vowel <b>V</b> complex vowel <b>B</b> beginning consonant <b>C</b> complex consonant <b>c</b> consonant <b>D</b> stupid consonant <b>d</b> stupid syllable <b>o</b> surname prefix <b>t</b> location <b>i</b> insult <b>m</b> mushy <b>M</b> mushy suffix <b>(the)</b> the <b>n</b> Epithet 1 <b>N</b> Epithet 2 <b>|</b> or operator <b><</b> symbols <b>></b> <b>(</b> literal <b>)</b></div>
     <textarea id="seedGenerator" rows="6"></textarea>
     <input type="text" id="spec" value="!<s|B|Bv|v><V|s|'|V><s|V|C>" />
-    <select style="width:25%;" id="targetNum">
+    <select class="quartersies" id="targetNum">
       <option value="30">30</option>
       <option value="29">29</option>
       <option value="28">28</option>
@@ -211,11 +208,8 @@
       <option value="3">3</option>
       <option value="2">2</option>
       <option value="1">1</option>
-    </select><button style="width:25%" onclick="orig_names(document.getElementById('markovnames').value);"
-      type="button">Random Name</button><button style="width:25%"
-      onclick="more_names(document.getElementById('markovnames').value);" type="button">Remixed Name</button><button
-      style="width:25%" onclick="remix_names();" type="button">Remix Existing</button>
-    <select style="width:50%" onchange="setIt(document.getElementById('preconfig').value);" id="preconfig">
+    </select><button class="quartersies darkback" onclick="remix_names();" type="button">Remix Existing</button><button class="quartersies darkback" onclick="more_names(document.getElementById('markovnames').value);" type="button">Remixed Name</button><button class="quartersies maroonback" onclick="reset_names();" type="button">Reset</button>
+    <select class="halfsies" onchange="setIt(document.getElementById('preconfig').value);" id="preconfig">
       <option value="!<s|B|Bv|v><V|s|'|V><s|V|C>">Default Formula</option>
       <option
         value="!((anvil|ash|axe|beggar’s|boat|bridge|castle|clear|coal|court|crest|crown|crystal|dark|death|deer|doom|dry|east|falcon|fall|fair|far|fire|fool’s|frey|frost|gloom|hammer|helm|hill|hogs|holly|hull|ice|iron|island|lake|lion|little|lone|meadow|mine|murk|new|north|oak|old|port|queens|rams|river|rock|rose|sea|shade|shepherd’s|shield|ship’s|snow|south|spear|spring|starry|storm|stone|summer|sword|vandal|wander|wave|well|west|willow|wind|winter|witch|wolf)|(atel|atol|bend|borne|borough|break|bridge|burn|castle|caster|cliff|coast|crest|croft|crown|dale|deep|den|edge|end|fall|falls|fell|feet|field|flower|ford|forge|fort|garden|glen|guard|gulch|haven|heart|heim|hill|hold|hole|hollow|horn|inn|islands|keep|land|lands|leaf|lock|march|marches|mead|meadow|meet|mere|mill|moor|mouth|outpost|pass|pool|ran|rest|ridge|roost|shield|shire|shore|side|spring|stone|ton|town|vale|wall|watch|water|wend|well|wick|wold|wood|worth))((atel|atol|bay|bend|borne|borough|break|bridge|burn|castle|caster|cliff|coast|crest|croft|crown|dale|deep|den|edge|end|fall|falls|fell|feet|field|flower|ford|forge|fort|garden|glade|glen|guard|gulch|haven|heart|heim|hill|hold|hole|hollow|horn|inn|islands|keep|land|lands|leaf|lock|march|marches|mead|meadow|meet|mere|mill|moor|mouth|outpost|pass|pool|ran|rest|ridge|roost|shield|shire|shore|side|spring|stone|ton|town|vale|wall|watch|water|wend|well|wick|wold|wood|worth)|((<v>r|ae|ang|ara|az|br|cal|car|ch|cor|cull|da|d<v>m|d<v>n|d<v>r|drac|ed|er|est|even|gon|gul|h<v>l|har|l<v>n|lui|mul|r<v>s|ray|ril|sher')(<v>|<v>d|a|b<v>|c<v>|d<v>|ess|h<v>|j<v>|l<v>|m<v>|on|or|s<v>|t<v>|)(<v|V>n|<v|V>r|<v|V>th|and|andia|ania|ara|as|ast|atel|atia|atol|bia|b<V>ra|cara|caria|d<v>r|dara|daria|den|dim|dolan|dol<V>n|dor|doria|ee|enta|entia|gar|gin|had|iand|iara|idara|idim|idol<V>n|inia|iora|lad|lan|ley|lie|mar|myr|myria|nara|naria|nath|natia|nen|nolan|nta|nt<V>|onia|patia|phar|phatia|r|r<v|V>th|rand|ren|ria|ril|rill|rua|ryn|tan|tar|tia|ton|tria|waith|wyn)))">
@@ -283,7 +277,7 @@
       <option
         value="!((Aba|Ada)|Abri|Af|(Ah|Ak)|Aliy|(Amm|An)|(Asa|Ash)|(Azar|Azi)|(Bah|Bey)|(Bal|Bil)|(Bam|Ben)|Bora|Char|Chet|Dah|(Dam|Din)|Dar|(Dauw|Dav)|(Del|Dil)|Ebu|(Eh|Ej)|El|Erd|(Es|Ez)|Ett|Far|(Fay|Feh)|(Gab|Ghib)|Gelah|(Geza|Giz)|Ghay|(Ghul|Gol)|Gudah|(Hak|Hik)|(Ham|Han)|Hav|Hos|Hwah|Ibi|(Ik|Iq)|(Il|Iru)|Isa|(Jah|Juh)|(Jam|Jin)|(Kah|Khay)|(Kam|Kan)|(Kas|Khash)|Kata|Kav|Khozh|Kiah|Kud|(Lah|Lay)|(Mah|Mal)|Marti|(Mir|Mur)|(Miy|Muy)|Mozh|Mokh|Mus|Nah|Nil|Nur|(Oh|Os)|Par|(Qah|Quy)|Qis|(Rah|Reh)|(Ram|Rin)|Ras|Riy|(Riz|Rus)|(Rogh|Ruk)|(Roh|Ruy)|(Sa|Shah)|(Sab|Sob)|(Sad|Sidi)|(Saf|Shaf)|(Saj|Shez)|Salah|(Sam|Shems)|(Sav|Sep)|(Seno|Sim)|Shab|Sher|(Shiy|Siah)|(Shoh|Zoh)|Tab|(Tah|Taj)|(Tal|Taw)|(Tam|Tan)|Touf|(Ul|Urs)|Vah|Vish|(Vol|Wal)|(Was|Yas)|(Yaw|Yuh)|Yus|(Zar|Zur))(ad|aheh|aila|ajwanda|(al|alma)|ama|ansu|ashak|asip|astu|attin|atul|(auf|avra)|(aya|ayu)|ayati|bak|bar|bassu|besh|bil|biyya|(biz|borz)|bula|chin|dal|(dam|din)|(dar|dur)|dashir|dat|dela|(dha|di)|diga|dos|dra|edin|ehrdad|etis|evgi|evrim|ezu|fandi|(faq|fi q)|fari|fattin|fayda|fi f|fi kar|fi ya|fuz|gan|(geh|gi)|ges|(ghul|gol)|gib|gir|(hadi|hid)|hadur|(ham|hanna)|hasta|hattin|(hayeh|hia)|hevar|(hij|hiyya)|(him|hina)|hir|hita|(iar|iya)|(iba|ifa)|ideh|(iha|ik)|ija|ila|ima|ind|inshah|ir|(isa|izar)|(isha|isuh)|ishan|(jab|jep)|(jad|jod)|jah|jarat|jis|(ka|key)|kandr|khan|kila|(kim|kina)|(kir|kora)|kram|ku|kwar|(lad|led)|(lah|lu)|(lal|lil)|(lam|lim)|lanu|lebek|(lekha|liq)|lous|(mah|mi)|mal|man|(mar|meer)|mat|mayil|mayra|mid|mina|mira|(moud|mud)|murgh|naid|(nam|nan)|(nas|naz)|nat|(nay|ni)|nife|nis|noush|oku|(omer|on)|pur|qat|rab|ragim|(rah|ri)|(rak|rukh)|(ram|ran)|rash|razad|regan|(ret|rud)|reyya|rian|riar|rifa|rij|(rim|rin)|(sal|sul)|(sama|san)|(sar|sir)|say|sayba|settin|(shad|shid)|(sham|shan)|shayr|sida|sif|(sim|suma)|siya|smet|sut|tach|tada|takhar|tam|tar|tasim|tau|taya|taza|temiz|tib|tros|tul|tunis|ud|ufar|uhsin|uwa|uzah|va|(van|vin)|vare|varid|vash|(vid|vizh)|viya|wa|wahir|wajit|wana|war|yaddin|(yal|yol)|(yam|yun)|yamin|yas|yub|za|zade|(zam|zan)|(zar|zur)|zet|zhang|ziya|zul) (<o> the|the) ((Accursed|Dread|Squamous|Unbearable|Void-Touched)|(All-Seeing|Omnipotent|Perceptive)|(Amber|Many-Coloured|Verdant)|(Ancient|August|Hoary|Old)|(Ardent|Bold|Burning|Imposing|Passionate|Stoic|Unwavering)|(Black|Dark|Ebon|Jet|Lightless|Obscured|Shadowy|Stygian)|(Beatific|Beauteous|Glorious|Most Excellent|Peerless|Virtuous)|(Benevolent|Celestial|Sagacious|Supreme|Transcendent|Wise)|(Blasphemous|Evil|False|Lawless|Masterless|Unburdened|Unruled|Bloody|Crimson|Maroon|Red|Rosy|Scarlet|Vermillion)|(Deathless|Eternal|Illustrious|Magnificent|Merciful/-less)|(Desired|Serene|Sublime)|(Diseased|Pale|Pallid|Sallow|Sick)|(Enchanter/-ress|Magical|Sorcerous)|(Exalted|Incomparable|Infinite|Remote|True|Unapproachable)|(Golden|Iridescent|Polished|Radiant|Reflecting|Silver)|(Heart of [(aspect|element|god|location|person)])|(Resplendent|Scintillating|Shimmering|Shining)|(Servant of [(demon|god|philosophy|principle)])|(Speaker of [(Doom|Ill Omens|Lies|Prophecy|Truth)]))">
         Wizard Names</option>
-    </select><select style="width:50%" id="markovnames">
+    </select><select class="halfsies" id="markovnames">
       <option value="common">Common Names</option>
       <option value="surnames">Surnames</option>
       <option value="olde">Olde Names</option>
@@ -318,8 +312,7 @@
       <option value="diety9">CE Gods</option>
       <option value="diety0">Demon Names</option>
       <option value="newNames">Cached Names</option>
-    </select>
-    <button style="width:50%" onclick="update();" type="button">Generate From Formula</button><button style="width:50%" onclick="reset_names();" type="button">Reset</button>
+    </select><button class="halfsies lightback" onclick="update();" type="button">Generate From Formula</button><button class="halfsies lightback" onclick="orig_names(document.getElementById('markovnames').value);" type="button">Random Name</button>
   </div>
   <div id="npcSection" class="form-group">
     <hr>
@@ -358,10 +351,10 @@
         </tr>
       </tbody>
     </table>
-    <div style="color:#666; text-align:right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
+    <div class="right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
         onClick="countUp()">Round</button></div>
-    <input style="width:100%" type="text" id="NPCname" placeholder="NPC/PC Name" />
-    <select style="width:50%" id="NPCtier">
+    <input class="full" type="text" id="NPCname" placeholder="NPC/PC Name" />
+    <select class="halfsies" id="NPCtier">
       <option value="random">Random Tier</option>
       <option value="0">Tier 0</option>
       <option value="1">Tier 1</option>
@@ -369,7 +362,7 @@
       <option value="3">Tier 3</option>
       <option value="4">Tier 4</option>
       <option value="5">Tier 5</option>
-    </select><select style="width:50%" id="NPCsystem">
+    </select><select class="halfsies" id="NPCsystem">
       <option value="random">Random System</option>
       <option value="Default">Default</option>
       <option value="3d6">Rolling 3d6</option>
@@ -380,7 +373,7 @@
       <option value="Point">Point Buy</option>
       <option value="Cards">52-card Poker Deck</option>
     </select>
-    <select style="width:50%" id="NPCform">
+    <select class="halfsies" id="NPCform">
       <option value="random">Random Form</option>
       <option value="mediumAll">All Medium</option>
       <option value="mediumHumanCommon">Common Medium (Human)</option>
@@ -554,7 +547,7 @@
       <option value="Young Dragon">Young Dragon</option>
       <option value="Yuan-Ti">Yuan-Ti</option>
       <option value="Yuan-Ti Pureblood">Yuan-Ti Pureblood</option>
-    </select><select style="width:50%" id="NPCtype">
+    </select><select class="halfsies" id="NPCtype">
       <option value="random">Random Type</option>
       <option value="monk">Monk</option>
       <option value="barbarian">Barbarian</option>
@@ -571,8 +564,7 @@
       <option value="artificer">Artificer</option>
       <option value="ranger">Ranger</option>
       <option value="bard">Bard</option>
-    </select><button style="width:50%" onclick="toggleTables()" type="button">ToggleTables</button><button
-      style="width:50%" onclick="generatorPC()" type="button">Generate PC/NPC</button>
+    </select><button class="halfsies darkback" onclick="toggleTables()" type="button">ToggleTables</button><button class="halfsies lightback" onclick="generatorPC()" type="button">Generate PC/NPC</button>
     <div id="field">
     </div>
     <div class="form-group" id="NPCgenerated">
@@ -581,76 +573,61 @@
       <hr>
     </div>
     <div class="form-group">
-      <div style="color:black">Crossbow Bolts (20) 1 GP 1½ lb. | Arrows (20) 1 GP 1 lb. | Darts (20) 1 GP 5 lb. | Blowgun
+      <div class="black">Crossbow Bolts (20) 1 GP 1½ lb. | Arrows (20) 1 GP 1 lb. | Darts (20) 1 GP 5 lb. | Blowgun
         Needles (50) 1 GP 1 lb. | 8 glugs to a gallon | 500 GP weight = 1 inventory slot | Add 1 Inventory slot per CON
       </div>
-      <div style="color:black">Item Name - Quantity () Damaged [] Mastery • Attuned * | Search terms: *Entries, |GameRules, @Creatures,
+      <div class="black">Item Name - Quantity () Damaged [] Mastery • Attuned * | Search terms: *Entries, |GameRules, @Creatures,
         •CreatureData, ?ItemData, #GP_cost, <#GP_cost_Max, #<#GP_cost_Range,>#ItemDescLengthMax</div>
-      <div style="color:black">Proficiency Bonus: T1:D4 | T2:D6 | T3:D8 | T4:D10 | Attunement: INT, WIS, CHA or CON (min 2
+      <div class="black">Proficiency Bonus: T1:D4 | T2:D6 | T3:D8 | T4:D10 | Attunement: INT, WIS, CHA or CON (min 2
         + tier) | (Languages) (Secret Language) (Magic Disciplines) (Snap Spell) (Prepared Spell) (Known Spell) (Proficiency) (Double Proficiency) (Ability) (Other Abilities) (Quirk)</div>
-      <div style="color:black">CTRL+SHIFT+S - Toggle Footer | CTRL+SHIFT+D - Clear Footer | CTRL+SHIFT+A - Toggle Dice Roller| CTRL+SHIFT+~ - Reset Dice Roller | CTRL+SHIFT+Q - Toggle Calculator | Numpad for Calc Input | Name Change Confirm - Enter | Press ADD Marker to store PC/NPC in page</div>
+      <div class="black">CTRL+SHIFT+S - Toggle Footer | CTRL+SHIFT+D - Clear Footer | CTRL+SHIFT+A - Toggle Dice Roller| CTRL+SHIFT+~ - Reset Dice Roller | CTRL+SHIFT+Q - Toggle Calculator | Numpad for Calc Input | Name Change Confirm - Enter | Press ADD Marker to store PC/NPC in page</div>
     </div>
-    <span style="display:inline-block; width:25%; height:100%; position:relative;">
-      <a style="position:absolute; right:0; bottom:0; padding:10px;" onclick="addtoTurnOrder('empty')"
+    <span class="boxholder">
+      <a class="black hangright" onclick="addtoTurnOrder('empty')"
         title="Add Empty">
-        <img style="height:1em;" src="svg/swords.svg" /></a>
-      <textarea style="width:100%" rows="20" onfocusout="orderofTurn()" id="turnOrder" name="turnOrder"
+        <img class="em1high" src="svg/swords.svg" /></a>
+      <textarea class="full" rows="20" onfocusout="orderofTurn()" id="turnOrder" name="turnOrder"
         placeholder="Party List & Turn Order"></textarea>
+      <span onclick="handoffate(this)" class="black hangright lightback"><img class="em1high" src="svg/hand.svg" /> Hand of Fate</span>
+    </span><span class="boxholder">
+      <a class="black hangright" onclick="twoDice(this)"
+        title="Two Dice Bell Curve"><img class="em1high" src="svg/dice.svg" /></a>
+      <textarea class="full" rows="20" placeholder="List & Random Table"></textarea>
       <span onclick="handoffate(this)"
-        style="position:absolute; top:0; right:0; color:black; background-color:lightblue; padding:10px;"><img style="height:1em;" src="svg/hand.svg" /> Hand of Fate</span>
-    </span>
-    <span style="display:inline-block; width:25%; height:100%; position:relative;">
-      <a style="position:absolute; right:0; bottom:0; padding:10px;" onclick="twoDice(this)"
-        title="Two Dice Bell Curve"><img style="height:1em;" src="svg/dice.svg" /></a>
-      <textarea style="width:100%" rows="20" placeholder="List & Random Table"></textarea>
-      <span onclick="handoffate(this)"
-        style="position:absolute; top:0; right:0; color:black; background-color:lightblue; padding:10px;"><img style="height:1em;" src="svg/hand.svg" /> Hand of Fate</span>
-    </span>
-    <span style="display:inline-block; width:25%; height:100%; position:relative;">
+        class="black hangright lightback"><img class="em1high" src="svg/hand.svg" /> Hand of Fate</span>
+    </span><span class="boxholder">
       <span class="deck-count"></span>
-      <a style="color:black; position:absolute; right:0; bottom:0; padding:10px;" onclick="drawCard(this,1)"
+      <a class="black hangright" onclick="drawCard(this,1)"
         title="Draw A Card">♠♥♣♦</a>
-      <textarea style="font-size:40px; font-family: 'Courier New', Courier, monospace; height:305px; width:100%"
-        rows="20" placeholder="Card Table"></textarea>
-      <span style="color:black; position:absolute; left:0; bottom:0; padding:10px;" onclick="drawCard(this,0)"
+      <textarea class="cardtable" rows="20" placeholder="Card Table"></textarea>
+      <span class="black hangleft" onclick="drawCard(this,0)"
         title="Reshuffle">×</span>
-    </span>
-    <span style="display:inline-block; width:24%; height:100%; position:relative;">
-      <textarea style="width:100%" rows="20" id="exportNPC" placeholder="Exported NPC JSON"></textarea>
+    </span><span class="boxholder">
+      <textarea class="full" rows="20" id="exportNPC" placeholder="Exported NPC JSON"></textarea>
+      <span onclick="saveTxt(this)" class="black hangrighttop lightback"><img class="em1high" src="svg/floppy-disk.svg" /> Save Text</span>
+      <span onclick="importNPC()" class="black lightback hangright"><img class="em1high" src="svg/floppy-disk-circle-arrow-right.svg" /> Import</span>
+    </span><span class="boxholderhalf">
+      <a class="hangleft" onclick="roShamBo(this,1)" title="✌>✋>✊>✌"><img class="em1high" src="svg/hand.svg" /></i></a>
+      <textarea id="damnHands" class="full" rows="20" placeholder="Notepad & Rock Paper Scissors"></textarea>
+      <a class="black hangright" onclick="roShamBo(this,0)" title="✌>✋>✊>🤏>🖖>✊>✌>🤏>✋>🖖>✌"><img class="em1high" src="svg/hand.svg" /></i></a>
+    </span><span class="boxholderhalf">
+      <textarea id="CharacterTxt" class="full" rows="20" placeholder="Exported NPC Text"></textarea>
       <span onclick="saveTxt(this)"
-        style="position:absolute; top:0; right:0; color:black; background-color:lightblue; padding:10px;"><img style="height:1em;" src="svg/floppy-disk.svg" /> Save Text</span>
-      <span onclick="importNPC()"
-        style="position:absolute; bottom:0; right:0; color:black; background-color:lightblue; padding:10px;"><img style="height:1em;" src="svg/floppy-disk-circle-arrow-right.svg" /> Import</span>
-    </span>
-    <span style="display:inline-block; width:50.2%; height:100%; position:relative;">
-      <a style="position:absolute; left:0; bottom:0; padding:10px;" onclick="roShamBo(this,1)" title="✌>✋>✊>✌"><img style="height:1em;" src="svg/hand.svg" /></i></a>
-      <textarea id="damnHands" style="width:100%" rows="20" placeholder="Notepad & Rock Paper Scissors"></textarea>
-      <a style="position:absolute; right:0; bottom:0; padding:10px;" onclick="roShamBo(this,0)"
-        title="✌>✋>✊>🤏>🖖>✊>✌>🤏>✋>🖖>✌"><img style="height:1em;" src="svg/hand.svg" /></i></a>
-    </span>
-    <span style="display:inline-block; width:49.2%; height:100%; position:relative;">
-      <textarea id="CharacterTxt" style="width:100%" rows="20" placeholder="Exported NPC Text"></textarea>
-      <span onclick="saveTxt(this)"
-        style="position:absolute; top:0; right:0; color:black; background-color:lightblue; padding:10px;"><img style="height:1em;" src="svg/floppy-disk.svg" /> Save Text</span>
+        class="black hangright lightback"><img class="em1high" src="svg/floppy-disk.svg" /> Save Text</span>
     </span>
   </div>
   <div id="mythicSection" class="form-group">
     <hr>
   </div>
   <div class="form-group">
-    <button style="width:33%" onclick="mythicGM(0)" type="button">Mythic</button>
-    <button style="width:33%" onclick="generateEvent(1)" type="button">Event</button>
-    <button style="width:33%" onclick="npcGenerate(0)" type="button">NPC Flavor</button>
+    <button class="thirdsies lightback" onclick="mythicGM(0)" type="button">Mythic</button><button class="darkback thirdsies" onclick="generateEvent(1)" type="button">Event</button><button class="thirdsies darkback" onclick="npcGenerate(0)" type="button">NPC Flavor</button>
   </div>
   <div class="form-group">
-    <input style="display:inline-block; width:89%" id="question" type="text" value=""
-      placeholder="Ask your Yes/No Question" />
-    <input style="display:inline-block; width:10%" id="manualNum" type="text" value="" placeholder="Manual Override" />
+    <input class="ninty" id="question" type="text" value="" placeholder="Ask your Yes/No Question" /><input class="ten" id="manualNum" type="text" value="" placeholder="Manual Override" />
   </div>
   <div class="form-group">
-    <div style="text-align:center;" id="mythic" name="mythic">Ask with desired outcome in the affirmative</div>
-  </div>
-  <div style="display:inline-block; width:33%" class="form-group">
+    <div class="black center" id="mythic" name="mythic">Ask with desired outcome in the affirmative</div>
+  </div><div class="thirdsies" class="form-group">
     <label for="event">
       Event Type:
     </label>
@@ -663,8 +640,7 @@
       <option value="Personal">Personal</option>
       <option value="Epic">Epic</option>
     </select>
-  </div>
-  <div style="display:inline-block; width:33%" class="form-group">
+  </div><div class="thirdsies" class="form-group">
     <label for="oddsOptions">
       Set Odds
     </label>
@@ -680,8 +656,7 @@
       <option value="Nearly Certain">Nearly Certain</option>
       <option value="Sure Thing">Sure Thing</option>
     </select>
-  </div>
-  <div style="display:inline-block; width:33%" class="form-group">
+  </div><div class="thirdsies" class="form-group">
     <label for="rankOptions">
       Set Rank/Chaos
     </label>
@@ -700,10 +675,7 @@
     </select>
   </div>
   <div class="form-group">
-    <input style="display:inline-block; width:49%" id="odds" type="text" value="" placeholder="Default: Even Odds 4"
-      readonly="readonly" />
-    <input style="display:inline-block; width:50%" id="rank" type="text" value="" placeholder="Default: Average 4"
-      readonly="readonly" />
+    <input class="halfsies" id="odds" type="text" value="" placeholder="Default: Even Odds 4" readonly="readonly" /><input class="halfsies" id="rank" type="text" value="" placeholder="Default: Average 4" readonly="readonly" />
   </div>
   <div id="itemSection" class="form-group">
     <hr>
@@ -712,7 +684,7 @@
     <textarea id="itemIdea" name="itemIdea" rows="27"></textarea>
   </div>
   <div class="form-group">
-    <select style="width:33%" id="itemOptions">
+    <select class="thirdsies" id="itemOptions">
       <option value="Generic">Generic</option>
       <option value="Generic Type">Generic Type</option>
       <option value="Melee Weapon">Melee Weapon</option>
@@ -737,27 +709,21 @@
       <option value="Treasure">Treasure</option>
       <option value="Locale">Locale</option>
       <option value="Connection">Connection</option>
-    </select>
-    <select style="width:33%" id="itemtype">
+    </select><select class="thirdsies" id="itemtype">
       <option value="Random">Level?</option>
       <option value="Shabby">Shabby</option>
       <option value="Common">Common</option>
       <option value="Uncommon">Uncommon</option>
       <option value="Rare">Rare</option>
       <option value="Epic">Epic</option>
-    </select>
-    <select style="width:33%" id="cursetype">
+    </select><select class="thirdsies" id="cursetype">
       <option value="Random">Curse?</option>
       <option value="Cursed">Cursed</option>
       <option value="Not Cursed">Not Cursed</option>
     </select>
   </div>
   <div class="form-group">
-    <button style="width:33%"
-      onclick="makeItem(document.getElementById('itemOptions').options[document.getElementById('itemOptions').selectedIndex].text)"
-      type="button">Make Item</button>
-    <button style="width:33%" onclick="makeItem()" type="button">Random Item</button>
-    <button style="width:33%" onclick="speakOutput(curses,1)" type="button">Curse</button>
+    <button class="thirdsies lightback" onclick="makeItem(document.getElementById('itemOptions').options[document.getElementById('itemOptions').selectedIndex].text)" type="button">Make Item</button><button class="thirdsies darkback" onclick="makeItem()" type="button">Random Item</button><button class="thirdsies darkback" onclick="speakOutput(curses,1)" type="button">Curse</button>
   </div>
   </form>
   <div id="mapSection" class="form-group">
@@ -793,6 +759,10 @@
       text-align: center;
       border: 5px solid #ccc;
       position: relative;
+    }
+
+    .dark-mode .square {
+      border: 5px solid #1b1e1f;
     }
 
     .square h1 {
@@ -1102,7 +1072,8 @@
     <a onclick="showRand(); return false;" href="#"><span>[Rand]</span></a>
   </div>
   <div class="footer accordion">
-    <label class="iconmen" id="openfooter"><img class="white" src="svg/arrow-down-to-square.svg" title="DICE ROLLER"/></label>
+    <label class="iconmen" id="openfooter"><img class="white" src="svg/arrow-down-to-square.svg" title="FOOTER TOGGLE"/></label>
+    <label style="margin-left:10px; float:left" for="darkModeToggle" class="iconmen"><img class="white" src="svg/circle-half-stroke.svg" title="TOGGLE DARK/LIGHT MODE"/></label>
     <label style="float:left" for="dice-box" class="read-more-trigger-dice iconmen"><img class="white" src="svg/dice.svg" title="DICE ROLLER"/></label>
     <label style="float:left" for="calc-box" class="read-more-trigger-calc iconmen"><img class="white" src="svg/calculator.svg" title="CALCULATOR"/></label>
     <div id="footer" contenteditable="true">
