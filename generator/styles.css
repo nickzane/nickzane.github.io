@@ -24,11 +24,64 @@ h4 {
   background-position: 0 0, 0 75px, 75px -75px, -75px 0px;
 }
 
+.data1d4, .data1d6, .data1d8, .data1d10, .data1d12, .data1d20 {
+  position: relative;
+  background: transparent;
+}
+
+.data1d4::before, .data1d6::before, .data1d8::before, .data1d10::before, .data1d12::before, .data1d20::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 30px;
+  width: 100%;
+  height: 100%;
+  opacity: 0.10;
+}
+
+.data1d4::before {
+  background: url('svg/dice-d4.svg') left top/contain no-repeat;
+}
+
+.data1d6::before {
+  background: url('svg/dice-d6.svg') left top/contain no-repeat;
+}
+
+.data1d8::before {
+  background: url('svg/dice-d8.svg') left top/contain no-repeat;
+}
+
+.data1d10::before {
+  background: url('svg/dice-d10.svg') left top/contain no-repeat;
+}
+
+.data1d12::before {
+  background: url('svg/dice-d12.svg') left top/contain no-repeat;
+}
+
+.data1d20::before {
+  background: url('svg/dice-d20.svg') left top/contain no-repeat;
+}
+
+#chessmenbox{
+  position: relative;
+}
+
 .chessmen{
-  text-align:right
+  text-align:right;
+  margin:1em 0;
+  position:absolute;
+  top:20px;
+  right:20px;
 }
 
 .chessmen img{
+  height:1em;
+  margin:1em 0;
+  display:inline-block;
+}
+
+.iconmen img{
   height:1em;
   margin:1em 0;
   display:inline-block;
@@ -535,12 +588,6 @@ select option {
   box-sizing: border-box;
 }
 
-@media (min-width: 768px) {
-  .navbar {
-    flex-direction: row;
-  }
-}
-
 .searchButtons {
   font-weight: bold;
   position: fixed;
@@ -555,6 +602,17 @@ select option {
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
+}
+
+#countbox{
+  margin:10px;
+  text-align:center;
+}
+
+#mythic{
+  color:#000;
+  font-weight: bold;
+  font-size:3em;
 }
 
 #targetNumber {

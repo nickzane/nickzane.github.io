@@ -1,5 +1,6 @@
 var abilitySet = [...srdabilityDesc, ...abilityDesc];
-var creatureSet = [...srdCreatureDesc, ...npcDragonDesc, ...npcCreatureDesc, ...npcCharDesc];
+var creatureSet = [...srdCreatureDesc, ...npcDragonDesc, ...npcCreatureDesc];
+var npcSet = [...npcCharDesc, ...custCharDesc];
 function resetCount() {
     clicks = 0;
     document.getElementById("clicks").innerHTML = clicks;
@@ -595,7 +596,7 @@ function resetCount() {
     var part2 = `r/o: ${rank}/${odds}`;
     var part1 = result ? `[${result}] ${part2} ${part3}` : '';
     var question = document.getElementById("question").value ? document.getElementById("question").value + part1 : part1;
-    document.getElementById("mythic").value = question + content;
+    document.getElementById("mythic").innerHTML = question + content;
   }
   function npcGenerate() {
     var scene = "NPC: " + getOutput(npc_adjectives) + ', ' + getOutput(npc_nouns) + ', ' + getOutput(npc_motivation_verbs) + ', ' + getOutput(npc_motivation_nouns);
@@ -1263,9 +1264,28 @@ function resetCount() {
     tableset.append(table.parentNode.parentNode.parentNode.parentNode);
   }
   function copyNPCTable(table) {
+    var tokens = JSON.parse(localStorage.getItem('tokens')) || [];
     var elem = table.parentNode.parentNode.parentNode.parentNode;
+    var u_id = elem.getAttribute('table-id');
     var clone = elem.cloneNode(true);
+
+    // Generate a new consistent ID based on the displayed name
+    var oldTableName = elem.querySelector('.dataName').innerHTML;
+    var newTableName = `${oldTableName}-${tokenCounter}`;
+    var newTokenID = `${newTableName}-${tokenCounter}`;
+    
+    clone.setAttribute('table-id', newTokenID);
+    clone.setAttribute('data-name', newTokenID);
+    clone.querySelector('.dataName').setAttribute('data-id', newTokenID);
+    clone.querySelector('.dataName').innerHTML = newTableName;
+
+    var existingToken = tokens.find(token => token.u_id === u_id);
     elem.after(clone);
+    
+    if (existingToken) {
+        var tokenSaver = document.querySelector(`div[data-uniqid="${u_id}"]`);
+        addMarker('ball1', newTokenID, newTableName);
+    }
   }
   function returnTarget(targetDiv){
     var targetRect = targetDiv.getBoundingClientRect();
@@ -1374,7 +1394,12 @@ function resetCount() {
   }
   var tokenCounter = parseInt(localStorage.getItem('tokenCounter')) || 1;
   function addMarker(piece, id, name, color, topmod, leftmod) {
-    var u_id = piece.startsWith('chess') ? `${piece}-${tokenCounter}` : id ? `${id}` : name ? `${name}-${tokenCounter}` : `Unnamed-${tokenCounter}` ;
+    var u_id;
+    if (piece.startsWith('chess')) {
+      u_id = `${piece}-${tokenCounter}`;
+    } else {
+      u_id = id ? `${id}` : name ? `${name}-${tokenCounter}` : `Unnamed-${tokenCounter}`;
+    }
     saveTable(u_id);
     if (document.querySelector(`div[data-uniqid="${id}"]`)){
       return;
@@ -1403,9 +1428,7 @@ function resetCount() {
     field.append(div);
     div.addEventListener('contextmenu', handleContextMenu);
     tokenCounter++;
-    var newtokenCounter = tokenCounter >= 1000 ? 1 : tokenCounter;
-    tokenCounter = newtokenCounter;
-    localStorage.setItem('tokenCounter', newtokenCounter.toString());
+    localStorage.setItem('tokenCounter', tokenCounter.toString());
     savePiece(tokenname, u_id, piece, color, div.style.left, div.style.top);
   }
   document.addEventListener('keydown', (event) => {
@@ -1414,6 +1437,7 @@ function resetCount() {
       var tokenId = event.target.getAttribute('data-id');
       var table = document.querySelector(`table[table-id="${tokenId}"]`);
       var token = document.querySelector(`div[data-uniqid="${tokenId}"]`);
+      table.setAttribute('data-name', tokenName);
       if (table && token){
         saveTable(tokenId);
         savePiece(tokenName, tokenId);
@@ -1510,7 +1534,7 @@ function resetCount() {
   }
   function clearChessboard(){
     var chessElements = document.querySelectorAll('[data-piece*="chess"]');
-    if (window.confirm("Are you SURE you want to Clear the Board of Chess Pieces?")) {
+    if (window.confirm("Are you SURE you want to Clear the Board of Pieces (Not Tokens)?")) {
       chessElements.forEach((element) => {
         element.remove();
         removeToken(element.dataset.uniqid);
@@ -1533,7 +1557,38 @@ function resetCount() {
     var total = sumStr(totalArray);
     total = total - 10;
     total = Math.floor(total / 2);
-    return array + ' = ' + total;
+    return total;
+  }
+  function rollUp3d6() {
+    var rolls = [];
+    for (var i = 0; i < 7; i++) {
+        var total = 0;
+        for (var j = 0; j < 3; j++) {
+            var number = getRandomIntMaxMin(6);
+            while (number === 1) {
+                number = getRandomIntMaxMin(6);
+            }
+            total += number;
+        }
+        var modifiedResult = Math.floor((total - 10) / 2);
+        rolls.push(modifiedResult);
+    }
+    rolls.sort((a, b) => a - b);
+    rolls.shift();
+    return rolls;
+  }
+  function rollUp4d6() {
+    var results = [];
+    for (var i = 0; i < 7; i++) {
+        results.push(rollUpCharacter(4));
+    }
+    var flattenedResults = [].concat.apply([], results);
+    var lowest = Math.min(...flattenedResults);
+    var index = flattenedResults.indexOf(lowest);
+    if (index !== -1) {
+        flattenedResults.splice(index, 1);
+    }
+    return flattenedResults;
   }
   var roShamBoStr = ['✊', '✋', '✌'];
   var roPapSciSpoLizStr = ['✊', '✋', '✌', '🖖', '🤏'];
@@ -1586,7 +1641,16 @@ function resetCount() {
     }
   }
   function rollCell(dice, number, dnum) {
-    var diceFaces = dice ? dice : parseInt(document.getElementById('diceFaces').value) ;
+    var diceFaces;
+    var kwb;
+    if (typeof number === 'string' && number.includes('d')) {
+      diceFaces = parseInt(number.substring(1));
+      number = 0;
+      kwb = 1;
+    } else {
+      diceFaces = dice ? dice : parseInt(document.getElementById('diceFaces').value);
+      kwb = 0;
+    }
     var rollModifier = document.getElementById('rollModifier').value;
     var tierProficiency = parseInt(document.getElementById('tierProficiency').value);
     var numDice = dnum ? dnum : parseInt(document.getElementById('numDice').value);
@@ -1641,35 +1705,35 @@ function resetCount() {
     var advword;
     switch(circumstantialModifier) {
       case 'easyAdvantage':
-        circumMod = '+8';
+        circumMod = '+5';
         advword = 'EasyA';
         break;
       case 'flatAdvantage':
-        circumMod = '+5';
+        circumMod = '+3';
         advword = 'FlatA';
         break;
       case 'hardAdvantage':
-        circumMod = '+2';
+        circumMod = '+1';
         advword = 'HardA';
         break;
       case 'easy':
-        circumMod = '+3';
+        circumMod = '+2';
         advword = 'Easy';
         break;
       case 'hard':
-        circumMod = '-3';
+        circumMod = '-2';
         advword = 'Hard';
         break;
       case 'easyDisadvantage':
-        circumMod = '-2';
+        circumMod = '-1';
         advword = 'EasyA';
         break;
       case 'flatDisadvantage':
-        circumMod = '-5';
+        circumMod = '-3';
         advword = 'FlatD';
         break;
       case 'hardDisadvantage':
-        circumMod = '-8';
+        circumMod = '-5';
         advword = 'HardD';
         break;
       default:
@@ -1681,9 +1745,9 @@ function resetCount() {
     var diceroll;
     for (let i = 0; i < numDice; i++) {
       var roll = Math.floor(Math.random() * diceFaces) + 1;
-      var rollDisplay = roll === 20 && diceFaces === 20 ? `<span style="color:#BA0CF8">20</span>` : roll === 1 && diceFaces === 20 ? `<span style="color:red">1</span>` : roll ;
+      var rollDisplay = roll === diceFaces ? `<span style="color:#BA0CF8">${diceFaces}</span>` : roll === 1 ? `<span style="color:red">1</span>` : roll ;
       var secondRoll = Math.floor(Math.random() * diceFaces) + 1;
-      var secondDisplay = secondRoll === 20 && diceFaces === 20 ? `<span style="color:#BA0CF8">20</span>` : secondRoll === 1 && diceFaces === 20 ? `<span style="color:red">1</span>` : secondRoll ;
+      var secondDisplay = secondRoll === diceFaces ? `<span style="color:#BA0CF8">${diceFaces}</span>` : secondRoll === 1 ? `<span style="color:red">1</span>` : secondRoll ;
       diceroll = roll;
       rolltotal += tierRoll;
       rolltotal += circumModNum;
@@ -1749,7 +1813,7 @@ function resetCount() {
     var time = new Date().toLocaleTimeString();
     document.getElementById("rollResult").innerHTML = resultText;
     document.getElementById('rollTime').innerHTML = '(' + time + ')';
-  };
+  }
   function addtoTurnOrder(name) {
     var insert = getRandomIntMaxMin(20) + ' ' + name;
     document.getElementById("turnOrder").value += insert + '\n';
@@ -1791,264 +1855,59 @@ function resetCount() {
     var familiar = Math.random() < 0.3 ? getOutput(getOutput(enemies.familiarMagical)) : Math.random() < 0.3 ? capFirst(getOutput(name1)) + ' ' + getOutput(getOutput(enemies.familiarMagical)) : Math.random() < 0.3 ? getOutput(getOutput(enemies.beastGeneral)) + ' ' + getOutput(getOutput(enemies.beastTiny)) : Math.random() < 0.3 ? getOutput(enemies.beastSwarm) : Math.random() < 0.3 ? getOutput(enemies.beastSmall) : Math.random() < 0.3 ? capFirst(getOutput(name1)) + ' ' + getOutput(enemies.beastMedium) : Math.random() < 0.3 ? getOutput(enemies.beastMedium) : Math.random() < 0.3 ? capFirst(getOutput(name1)) + ' ' + getOutput(enemies.beastLarge) : Math.random() < 0.3 ? getOutput(enemies.beastMagic) : capFirst(getOutput(name1)) + ' ' + getOutput(enemies.beastMagic);
     return familiar;
   }
-  function gameClassAbilityBase(type) {
-    var classes = {
-      'monk': '<br>(Ability) Pool of Ki<br>(Ability) Flurry of Blows<br>(Ability) Ki-Fueled Strike<br>',
-      'barbarian': '<br>(Ability) Pool of Grit<br>(Ability) Rage<br>(Ability) Unarmored Defense<br>',
-      'warrior': '<br>(Ability) Pool of Grit<br>(Ability) Second Wind<br>(Ability) Opportunity Attacks<br>',
-      'thief': '<br>(Ability) Pool of Bits<br>(Ability) Opportunity Attacks<br><span style=oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">(Rogue Proficiency) ' + getOutput(proficiency) + '</span><br>(Secret Language) Thieves’ Cant<br>',
-      'assassin': '<br>(Ability) Pool of Bits<br><span style=oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">(Rogue Proficiency) ' + getOutput(proficiency) + '</span><br>',
-      'spy': '<br>(Ability) Pool of Bits<br>(Ability) Cunning Action<br><span style=oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">(Rogue Proficiency) ' + getOutput(proficiency) + '</span><br>  ',
-      'cleric': '<br>(Ability) Channel Divinity<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'druid': '<br>(Ability) Wild Shape<br>(Secret Language) Druidic<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'paladin': '<br>(Ability) Opportunity Attacks<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'sorcerer': '<br>(Ability) Font of Magic<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'warlock': '<br>(Ability) Pact Magic<br>(Ability) <span style=oncontextmenu="this.innerHTML = getOutput(characterOptions.eldritchInvocation); return false;" title="Invocation">' + getOutput(characterOptions.eldritchInvocation) + ' (Invocation)</span><br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'wizard': '<br>(Ability) Full Caster<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'artificer': '<br>(Ability) Infusion Ability<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'ranger': '<br>(Ability) Call Companion<br>(Snap Spell) hunter’s mark, <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>',
-      'bard': '<br>(Ability) Inspiration<br>(Snap Spell) <span style=oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Cantrip">' + getOutput(dndspells.cantrip) + '</span>'
-    }
-    return classes[type];
-  }
   function exportNPC(Character) {
-    var table = Character.parentNode.parentNode.parentNode.parentNode;
-    var dataName;
-    table.getElementsByClassName('dataName')[0].innerText === '' ? dataName = 'Unnamed' : dataName = table.getElementsByClassName('dataName')[0].innerText;
-    var dataLevel = table.getElementsByClassName('dataLevel')[0].innerText;
-    var dataType = table.getElementsByClassName('dataType')[0].innerText;
-    var dataGold = table.getElementsByClassName('dataGold')[0].innerText.replace(/\D/g, '');;
-    var dataPro = table.getElementsByClassName('dataPro')[0].innerText;
-    var dataProDesc = table.getElementsByClassName('dataPro')[0].title;
-    var dataHP = table.getElementsByClassName('dataHP')[0].innerText;
-    var dataTier = table.getElementsByClassName('dataTier')[0].innerText;
-    var dataKind = table.getElementsByClassName('dataKind')[0].innerText;
-    var dataSize = table.getElementsByClassName('dataKind')[0].title;
-    var strStat = table.getElementsByClassName('dataSTR')[0].innerText;
-    var dexStat = table.getElementsByClassName('dataDEX')[0].innerText;
-    var conStat = table.getElementsByClassName('dataCON')[0].innerText;
-    var intStat = table.getElementsByClassName('dataINT')[0].innerText;
-    var wisStat = table.getElementsByClassName('dataWIS')[0].innerText;
-    var chaStat = table.getElementsByClassName('dataCHA')[0].innerText;
-    var bestStats = table.getElementsByClassName('dataBest')[0].innerText;
-    var data1d4 = table.getElementsByClassName('data1d4')[0].innerText;
-    var data1d6 = table.getElementsByClassName('data1d6')[0].innerText;
-    var data1d8 = table.getElementsByClassName('data1d8')[0].innerText;
-    var data1d10 = table.getElementsByClassName('data1d10')[0].innerText;
-    var data1d12 = table.getElementsByClassName('data1d12')[0].innerText;
-    var defStat = table.getElementsByClassName('dataDEF')[0].innerText;
-    var dataRoll = table.getElementsByClassName('dataRoll')[0].innerText;
-    var dataCount = table.getElementsByClassName('dataCount')[0].innerText;
-    var dataDesc = table.getElementsByClassName('dataDesc')[0].innerText;
-    var abilities = table.getElementsByClassName('abilities')[0].innerText.split('\n');
-    var inventory = table.getElementsByClassName('inventory')[0].innerText.split('\n');
-    var abil = '';
-    var inv = '';
-    for (let item in abilities) {
-      abil += abilities[item] + '~';
-    }
-    for (let item in inventory) {
-      inv += inventory[item] + '~';
-    }
-    var description = { 'size': dataSize, 'level': dataLevel, 'tier': dataTier, 'prois': dataProDesc, 'profession': dataPro, 'bestStats': bestStats, 'dataRoll': dataRoll, 'counters': dataCount, 'desc': dataDesc, 'abil': abil, 'inv': inv }
-    var jsonExample = {
-      "name": dataName,
-      "type": "character",
-      "img": "icons/svg/mystery-man.svg",
-      "system": {
-        "stats": {
-          "str": {
-            "value": String(strStat),
-            "base": Number(strStat),
-            "loot": 0
-          },
-          "dex": {
-            "value": String(dexStat),
-            "base": Number(dexStat),
-            "loot": 0
-          },
-          "con": {
-            "value": String(conStat),
-            "base": Number(conStat),
-            "loot": 0
-          },
-          "int": {
-            "value": String(intStat),
-            "base": Number(intStat),
-            "loot": 0
-          },
-          "wis": {
-            "value": String(wisStat),
-            "base": Number(wisStat),
-            "loot": 0
-          },
-          "cha": {
-            "value": String(chaStat),
-            "base": Number(chaStat),
-            "loot": 0
-          }
-        },
-        "effort": {
-          "basic": {
-            "value": String(data1d4),
-            "base": Number(data1d4),
-            "loot": 0
-          },
-          "weapon": {
-            "value": String(data1d6),
-            "base": Number(data1d6),
-            "loot": 0
-          },
-          "gun": {
-            "value": String(data1d8),
-            "base": Number(data1d8),
-            "loot": 0
-          },
-          "magic": {
-            "value": String(data1d10),
-            "base": Number(data1d10),
-            "loot": 0
-          },
-          "ultimate": {
-            "value": String(data1d12),
-            "base": Number(data1d12),
-            "loot": 0
-          }
-        },
-        "health": {
-          "value": Number(dataHP),
-          "min": 0,
-          "max": Number(dataHP)
-        },
-        "armor": {
-          "value": 0,
-          "base": Number(defStat),
-          "loot": 0
-        },
-        "description": description,
-        "class": dataType,
-        "bioform": dataKind,
-        "story": "",
-        "coin": {
-          "value": Number(dataGold)
-        },
-        "dying": {
-          "value": 0
-        },
-        "mastery": {
-          "Arcane": 0,
-          "Holy": 0,
-          "Infernal": 0
-        },
-        "spellTypeMastery": {
-          "spellType": "",
-          "value": 0
-        },
-        "stun": {
-          "value": 10
-        },
-        "herocoin": false
-      },
-      "prototypeToken": {
-        "name": dataName,
-        "displayName": 10,
-        "actorLink": false,
-        "width": 1,
-        "height": 1,
-        "lockRotation": true,
-        "rotation": 0,
-        "alpha": 1,
-        "light": {
-          "alpha": 0.5,
-          "angle": 360,
-          "bright": 0,
-          "coloration": 1,
-          "dim": 0,
-          "luminosity": 0.5,
-          "saturation": 0,
-          "contrast": 0,
-          "shadows": 0,
-          "animation": {
-            "speed": 5,
-            "intensity": 5,
-            "reverse": false,
-            "type": null
-          },
-          "darkness": {
-            "min": 0,
-            "max": 1
-          },
-          "color": null,
-          "attenuation": 0.5
-        },
-        "disposition": 0,
-        "displayBars": 10,
-        "bar1": {
-          "attribute": "health"
-        },
-        "bar2": {
-          "attribute": null
-        },
-        "flags": {
-          "token-hud-wildcard": {
-            "default": ""
-          }
-        },
-        "randomImg": false,
-        "texture": {
-          "src": "icons/svg/mystery-man.svg",
-          "tint": null,
-          "scaleX": 1,
-          "scaleY": 1,
-          "offsetX": 0,
-          "offsetY": 0,
-          "rotation": 0
-        },
-        "sight": {
-          "angle": 120,
-          "enabled": false,
-          "range": 0,
-          "brightness": 1,
-          "visionMode": "basic",
-          "color": null,
-          "attenuation": 0.1,
-          "saturation": 0,
-          "contrast": 0
-        },
-        "detectionModes": []
-      },
-      "_stats": {
-        "systemId": "icrpg",
-        "systemVersion": "3.3.0",
-        "coreVersion": "10.286",
-        "createdTime": null,
-        "modifiedTime": 1663766988284,
-        "lastModifiedBy": "t4jX3D9D3SvuzQeb"
-      }
-    }
-    document.getElementById('exportNPC').value = JSON.stringify(jsonExample);
-    var ability = '';
-    var charGear = '';
-    for (let item in abilities) {
-      ability += abilities[item] + `\n`;
-    }
-    for (let item in inventory) {
-      charGear += inventory[item] + `\n`;
-    }
-    dataType = dataType.charAt(0).toUpperCase() + dataType.slice(1);
-    dataSize = dataSize.charAt(0).toUpperCase() + dataSize.slice(1);
-    document.getElementById('CharacterTxt').value =
-      `Name: ${dataName} Level: ${dataLevel} (Tier: ${dataTier})
-  ${dataSize} sized ${dataKind} ${dataType}
-  [Gold: ${dataGold} GP Health: ${dataHP} HP]
-  STR ${signAdd(strStat)}${strStat} DEX ${signAdd(dexStat)}${dexStat} CON ${signAdd(conStat)}${conStat} INT ${signAdd(intStat)}${intStat} WIS ${signAdd(wisStat)}${wisStat} CHA ${signAdd(chaStat)}${chaStat}
-  BAS +${data1d4} STA +${data1d6} ADV +${data1d8} ENH +${data1d10} PER +${data1d12} DEF ${signAdd(defStat)}${defStat}
-  Description: ${dataDesc}
-  Profession: ${dataPro.split(": ")[1]} (${dataProDesc}) 
-  Best Stats: ${bestStats}
-  ${dataRoll}
-  Counters: ${dataCount}
-  Abilities: ${ability}Gear: ${charGear}`;
+    var table = document.querySelector(`table[table-id="${Character}"]`);
+    var tableHTML = table.outerHTML;
+  document.getElementById('exportNPC').value = JSON.stringify(tableHTML);
+  var dataName;
+  table.getElementsByClassName('dataName')[0].innerText === '' ? dataName = 'Unnamed' : dataName = table.getElementsByClassName('dataName')[0].innerText;
+  var dataLevel = table.getElementsByClassName('dataLevel')[0].innerText;
+  var dataType = table.getElementsByClassName('dataType')[0].innerText;
+  var dataGold = table.getElementsByClassName('dataGold')[0].innerText.replace(/\D/g, '');;
+  var dataPro = table.getElementsByClassName('dataPro')[0].innerText;
+  var dataProDesc = table.getElementsByClassName('dataPro')[0].title;
+  var dataHP = table.getElementsByClassName('dataHP')[0].innerText;
+  var dataTier = table.getElementsByClassName('dataTier')[0].innerText;
+  var dataKind = table.getElementsByClassName('dataKind')[0].innerText;
+  var dataSize = table.getElementsByClassName('dataKind')[0].title;
+  var strStat = table.getElementsByClassName('dataSTR')[0].innerText;
+  var dexStat = table.getElementsByClassName('dataDEX')[0].innerText;
+  var conStat = table.getElementsByClassName('dataCON')[0].innerText;
+  var intStat = table.getElementsByClassName('dataINT')[0].innerText;
+  var wisStat = table.getElementsByClassName('dataWIS')[0].innerText;
+  var chaStat = table.getElementsByClassName('dataCHA')[0].innerText;
+  var bestStats = table.getElementsByClassName('dataBest')[0].innerText;
+  var data1d4 = table.getElementsByClassName('data1d4')[0].innerText;
+  var data1d6 = table.getElementsByClassName('data1d6')[0].innerText;
+  var data1d8 = table.getElementsByClassName('data1d8')[0].innerText;
+  var data1d10 = table.getElementsByClassName('data1d10')[0].innerText;
+  var data1d12 = table.getElementsByClassName('data1d12')[0].innerText;
+  var defStat = table.getElementsByClassName('dataDEF')[0].innerText;
+  var dataRoll = table.getElementsByClassName('dataRoll')[0].innerText;
+  var dataCount = table.getElementsByClassName('dataCount')[0].innerText;
+  var dataDesc = table.getElementsByClassName('dataDesc')[0].innerText;
+  var abilities = table.getElementsByClassName('abilities')[0].innerText.split('\n');
+  var inventory = table.getElementsByClassName('inventory')[0].innerText.split('\n');
+  var ability = '';
+  var charGear = '';
+  for (let item in abilities) {
+    ability += abilities[item] + `\n`;
+  }
+  for (let item in inventory) {
+    charGear += inventory[item] + `\n`;
+  }
+  document.getElementById('CharacterTxt').value =
+`Name: ${dataName} Level: ${dataLevel} (Tier: ${dataTier})
+${dataSize} sized ${dataKind} ${dataType}
+[Gold: ${dataGold} GP Health: ${dataHP} HP]
+STR ${signAdd(strStat)}${strStat} DEX ${signAdd(dexStat)}${dexStat} CON ${signAdd(conStat)}${conStat} INT ${signAdd(intStat)}${intStat} WIS ${signAdd(wisStat)}${wisStat} CHA ${signAdd(chaStat)}${chaStat}
+BAS +${data1d4} STA +${data1d6} ENH +${data1d8} ADV +${data1d10} ULT +${data1d12} DEF ${signAdd(defStat)}${defStat}
+Description: ${dataDesc}
+Profession: ${dataPro} (${dataProDesc}) 
+Best Stats: ${bestStats}
+${dataRoll}
+Counters: ${dataCount}
+Abilities: ${ability}Gear: ${charGear}`;
   }
   function parseAbilities(str) {
     return result;
@@ -2058,19 +1917,19 @@ function resetCount() {
     if (!importNPC) {
       return false;
     }
-    var details = importNPC.system.description;
-    var prestat = importNPC.system.stats;
-    var gold = importNPC.system.coin.value + ' GP';
-    var stats = { 'STR': prestat.str.base, 'DEX': prestat.dex.base, 'CON': prestat.con.base, 'INT': prestat.int.base, 'WIS': prestat.wis.base, 'CHA': prestat.cha.base, 'HP': importNPC.system.health.value }
-    var effort = [];
-    effort.push(importNPC.system.effort.basic.base);
-    effort.push(importNPC.system.effort.weapon.base);
-    effort.push(importNPC.system.effort.gun.base);
-    effort.push(importNPC.system.effort.magic.base);
-    effort.push(importNPC.system.effort.ultimate.base);
-    var abilities = details.abil.split("~").join("<br>");
-    var inventory = details.inv.split("~").join("<br>");
-    generateTable(importNPC.name, details.level, importNPC.system.class, gold, details.prois, details.profession, details.tier, details.size, importNPC.system.bioform, stats, details.bestStats, effort, importNPC.system.armor.base, details.dataRoll, details.counters, details.desc, abilities, inventory);
+    if (/^<table/i.test(importNPC)) {
+      var parser = new DOMParser();
+      var parsedHTML = parser.parseFromString(importNPC, 'text/html');
+      var newTable = parsedHTML.querySelector('table');
+      if (newTable) {
+        var containerDiv = document.getElementById('NPCgenerated');
+        if (containerDiv) {
+          containerDiv.appendChild(newTable);
+        } else {
+          console.error(`Parent div 'NPCgenerated' not found`);
+        }
+      }
+    }
   }
   function twoDice(button) {
     var textarea = button.nextElementSibling;
@@ -2324,8 +2183,23 @@ function resetCount() {
     var search_term = document.getElementById('search').value.toLowerCase();
     var count = 0;
     if (search_term) {
-      if (search_term === '*') {
+      if (search_term === '*' && search_term.length === 1) {
         abilitySet
+          .forEach((e) => {
+            var div = makeList(e, count);
+            resultBox.appendChild(div);
+            count++;
+          });
+      } else if (search_term.includes('*')) {
+        var searchTerms = search_term.replace('*', '').split(', ');
+        abilitySet
+          .filter((holder) => {
+            return searchTerms.every((term) => {
+              return (
+                holder.entry.toLowerCase().includes(term)
+              );
+            });
+          })
           .forEach((e) => {
             var div = makeList(e, count);
             resultBox.appendChild(div);
@@ -2337,9 +2211,11 @@ function resetCount() {
           .filter((holder) => {
             return searchTerms.every((term) => {
               return (
-                holder.name.toLowerCase().includes(term) ||
-                holder.entry.toLowerCase().includes(term) ||
-                holder.locales.toLowerCase().includes(term)
+                holder.desc && (
+                  holder.name.toLowerCase().includes(term) ||
+                  holder.entry.toLowerCase().includes(term) ||
+                  holder.locales.toLowerCase().includes(term)
+                )
               );
             });
           })
@@ -2350,11 +2226,32 @@ function resetCount() {
           });
       } else if (search_term.includes('|')) {
         var searchTerms = search_term.replace('|', '').split(', ');
-        npcCharDesc
+        gameRules
+          .filter((holder) => {
+            return searchTerms.every((term) => {
+              return (
+                holder.desc && 
+                (
+                  holder.name.toLowerCase().includes(term) ||
+                  holder.entry.toLowerCase().includes(term) ||
+                  holder.desc.toLowerCase().includes(term)
+                )
+              );
+            });
+          })
+          .forEach((e) => {
+            var div = makeList(e, count);
+            resultBox.appendChild(div);
+            count++;
+          });
+      } else if (search_term.includes('~')) {
+        var searchTerms = search_term.replace('~', '').split(', ');
+        npcSet
           .filter((holder) => {
             return searchTerms.every((term) => {
               return (
                 holder.name.toLowerCase().includes(term) ||
+                holder.desc.toLowerCase().includes(term) ||
                 holder.entry.toLowerCase().includes(term) ||
                 holder.locales.toLowerCase().includes(term)
               );
@@ -2431,8 +2328,10 @@ function resetCount() {
           .filter((holder) => {
             return searchTerms.every((term) => {
               return (
-                holder.name.toLowerCase().includes(term) ||
-                holder.entry.toLowerCase().includes(term)
+                holder.desc && (
+                  holder.name.toLowerCase().includes(term) ||
+                  holder.entry.toLowerCase().includes(term)
+                )
               );
             });
           })
@@ -2692,11 +2591,12 @@ function resetCount() {
       console.error("Parent div 'NPCgenerated' not found in the document");
     }
   }
-  function generateTable(name, charLevel, charType, charGold, charProdesc, charPro, charTier, charKinddesc, charKind, stats, bestStats, effort, charDEF, dataRoll, dataCount, charDesc, abilities, equipment) {
+  function generateTable(name, charLevel, charType, charGold, charProdesc, charPro, charTier, charKinddesc, charKind, stats, bestStats, effort, charDEF, dataRoll, dataCount, charDesc, abilities, equipment, health) {
     var stats = stats ? stats : { 'STR': 0, 'DEX': 0, 'CON': 0, 'INT': 0, 'WIS': 0, 'CHA': 0, 'HP': 1 }
     var effort = effort ? effort : [0, 0, 0, 0, 0];
-    var health = stats['HP'] ? stats['HP'] : '10';
-    var tableElement = `<table onclick="event.preventDefault();" oncontextmenu="event.preventDefault();" class="NPCinfo" table-id="${name}-${tokenCounter}" data-name="${name}-${tokenCounter}" style="color:#333; display:inline-table; width:25%">
+    health = health ? health : '10';
+    tokenCounter++;
+    var tableElement = `<table onclick="event.preventDefault();" oncontextmenu="event.preventDefault();" class="NPCinfo" table-id="${name}-${tokenCounter}" data-name="${name}" style="color:#333; display:inline-table; width:600px">
     <thead>
       <tr style="height:60px">
         <th colspan="1">
@@ -2712,12 +2612,12 @@ function resetCount() {
       <tr>
         <td style="width:22%" colspan="2"><span class="dataKind" oncontextmenu="var raceset = getOutput(races); this.innerHTML = raceset.split(': ')[1]; this.title = raceset.split(': ')[0]; return false;" onclick="populateList(this.innerHTML)" title="${charKinddesc}" contenteditable="true">${charKind}</span>
         </td>
-        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">STR <div class="dataSTR" contenteditable="true">${stats['STR']}</div></td>
-        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">DEX <div class="dataDEX" contenteditable="true">${stats['DEX']}</div></td>
-        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">CON <div class="dataCON" contenteditable="true">${stats['CON']}</div></td>
-        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">INT <div class="dataINT" contenteditable="true">${stats['INT']}</div></td>
-        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">WIS <div class="dataWIS" contenteditable="true">${stats['WIS']}</div></td>
-        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">CHA <div class="dataCHA" contenteditable="true">${stats['CHA']}</div></td>
+        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">STR <div class="dataSTR data1d20" contenteditable="true">${stats['STR']}</div></td>
+        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">DEX <div class="dataDEX data1d20" contenteditable="true">${stats['DEX']}</div></td>
+        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">CON <div class="dataCON data1d20" contenteditable="true">${stats['CON']}</div></td>
+        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">INT <div class="dataINT data1d20" contenteditable="true">${stats['INT']}</div></td>
+        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">WIS <div class="dataWIS data1d20" contenteditable="true">${stats['WIS']}</div></td>
+        <td style="width:13%" onclick="rollCell(20, this.childNodes[1].innerHTML)">CHA <div class="dataCHA data1d20" contenteditable="true">${stats['CHA']}</div></td>
       </tr>
       <tr>
         <td colspan="2">
@@ -2728,14 +2628,14 @@ function resetCount() {
         <td onclick="rollCell(8, this.childNodes[1].innerHTML)" title="Advanced">1d8 <div class="data1d8" contenteditable="true">${effort[2]}</div></td>
         <td onclick="rollCell(10, this.childNodes[1].innerHTML)" title="Enhanced">1d10 <div class="data1d10" contenteditable="true">${effort[3]}</div></td>
         <td onclick="rollCell(12, this.childNodes[1].innerHTML)" title="Perfect">1d12 <div class="data1d12" contenteditable="true">${effort[4]}</div></td>
-        <td onclick="rollCell(20, this.childNodes[1].innerHTML)">DEF <div class="dataDEF" contenteditable="true">${charDEF}</div></td>
+        <td onclick="rollCell(20, this.childNodes[1].innerHTML)">DEF <div class="dataDEF data1d20" contenteditable="true">${charDEF}</div></td>
       </tr>
       <tr>
         <td style="padding:0 0.5em; white-space: nowrap" colspan="2">
           <img onclick="addMarker('ball1', this.closest('.NPCinfo').getAttribute('table-id'), this.parentNode.parentNode.parentNode.parentNode.children[0].childNodes[1].childNodes[1].innerText, 0)" style="height:1em;  margin:1em 0" src="svg/arrows-down-to-people.svg" title="ADD MARKER"/>
           <img onclick="takeCover(this)" style="height:1em; margin:1em 0" src="svg/circle-half-stroke.svg" title="TAKE COVER"/>
           <img onclick="addtoTurnOrder(parentNode.parentNode.parentNode.childNodes[1].childNodes[1].childNodes[1].innerHTML)" style="height:1em; margin:1em 0;" src="svg/swords.svg" title="FIGHT"/>
-          <img onclick="generateTable('BOSS', 0, 'BOSS', 0, 'BOSS', 'BOSS', 0, 'BOSS', 'BOSS', { 'STR': 5, 'DEX': 5, 'CON': 5, 'INT': 5, 'WIS': 5, 'CHA': 5, 'HP': 50 }, '', [5, 5, 5, 5, 5], 5, '', '', '', '', '')" style="height:1em; margin:1em 0;" src="svg/axe-battle.svg" title="BOSS"/>
+          <img onclick="generateTable('BOSS', 0, 'BOSS', 0, 'BOSS', 'BOSS', 0, 'BOSS', 'BOSS', { 'STR': 5, 'DEX': 5, 'CON': 5, 'INT': 5, 'WIS': 5, 'CHA': 5 }, '', [5, 5, 5, 5, 5], 5, '', '', '', '', '', 50)" style="height:1em; margin:1em 0;" src="svg/axe-battle.svg" title="BOSS"/>
           <img onclick="generateTable('Object', 0, 'Object', 0, 'Object', 'Object', 0, 'Object', 'Object', 0, '', 0, 0, '', '', '', '', '')" style="height:1em; margin:1em 0;" src="svg/axe.svg" title="OBJECT"/>
           <img onclick="copyNPCTable(this)" style="height:1em; margin:1em 0;" src="svg/people-arrows.svg" title="COPY"/>
           <img onclick="moveNPCTable(this)" style="height:1em; margin:1em 0;" src="svg/circle-right.svg" title="MOVE"/>
@@ -2754,18 +2654,18 @@ function resetCount() {
     <tbody class="tableBodies" style="display:none">
       <tr>
         <td style="position:relative; height:2em;" colspan="8">
-        <p class="del-button" onclick="removeToken(this.closest('table').getAttribute('data-name'))"><span style="float:clear; line-height:2em; padding-left:15px; padding-top:0.5em;">Delete</span></p>
-        <p class="export-button" onclick="exportNPC(this)"><span style="float:clear; line-height:2em; padding-left:15px; padding-top:0.5em;">Export</span></p>
+        <p class="del-button" onclick="removeTable(this)"><span style="float:clear; line-height:2em; padding-left:15px; padding-top:0.5em;">Delete</span></p>
+        <p class="export-button" onclick="exportNPC(this.closest('.NPCinfo').getAttribute('table-id'))"><span style="float:clear; line-height:2em; padding-left:15px; padding-top:0.5em;">Export</span></p>
         </td>
       </tr>
       <tr>
         <td colspan="8">
         <div class="dataDesc" spellcheck="false" contenteditable="true">${charDesc}</div>
+        <div class="dataRoll" contenteditable="true">${dataRoll}</div>
         </td>
       </tr>
       <tr>
         <td style="width:50%" colspan="4">
-          <div class="dataRoll" contenteditable="true">${dataRoll}</div>
           <div class="abilities" spellcheck="false" contenteditable="true">${abilities}</div>
         </td>
         <td colspan="4" oncontextmenu='encumbranceCheck(this)'>
@@ -3049,58 +2949,149 @@ function resetCount() {
     var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
     var hitPoints = jsonData.hp;
     hitPoints += Math.ceil(hitPoints *= (plusOrMinus * getRandomPercentage(30)) / 100);
-    generateTable(name.replace('@', ''), jsonData.hit, "NPC", startingGold, profession[1], profession[0], jsonData.tier, kind1, kind2, { 'STR': jsonData.str, 'DEX': jsonData.dex, 'CON': jsonData.con, 'INT': jsonData.int, 'WIS': jsonData.wis, 'CHA': jsonData.cha, 'HP': hitPoints }, '', [jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit], jsonData.def, "", "Counters", description + ' Regular HP: ' + jsonData.hp, abilities, inventory);
+    generateTable(name.replace('@', ''), jsonData.hit, "NPC", startingGold, profession[1], profession[0], jsonData.tier, kind1, kind2, { 'STR': jsonData.str, 'DEX': jsonData.dex, 'CON': jsonData.con, 'INT': jsonData.int, 'WIS': jsonData.wis, 'CHA': jsonData.cha }, '', [jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit], jsonData.def, "", "Counters", description + ' Regular HP: ' + jsonData.hp, abilities, inventory, hitPoints);
+  }
+  var gameClass = {
+    'monk': 'WIS, DEX',
+    'barbarian': 'CON, STR',
+    'warrior': 'STR, CON',
+    'thief': 'DEX, STR',
+    'assassin': 'STR, INT',
+    'spy': 'CHA, WIS',
+    'cleric': 'WIS, CHA',
+    'druid': 'WIS, CON',
+    'paladin': 'STR, CHA',
+    'sorcerer': 'INT, CON',
+    'warlock': 'CHA, DEX',
+    'wizard': 'INT, DEX',
+    'artificer': 'CON, INT',
+    'ranger': 'DEX, WIS',
+    'bard': 'CHA, INT'
   }
   function generatorPC() {
-    var startingPacks = [
-      'backpack (stow below)<br>sack (1)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>lantern<br>oil (flask) (2)<br>tinderbox<br>piton (12)<br>hammer<br>waterskin (4 Glugs)<br>rations (4 days)<br>5 GP',
-      'backpack (stow below)<br>sack (2)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>torch (10)<br>oil (flask) (3)<br>tinderbox<br>10’ pole<br>rope (50’)<br>waterskin (4 Glugs)<br>rations (4 days)<br>steel mirror',
-      'backpack (stow below)<br>sack (4)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>piton (12)<br>rope (50’)<br>waterskin (4 Glugs)<br>rations (4 days)']
-    var wizardFamiliar = Math.random() < 0.5 ? '<br><span style="color:orange;" oncontextmenu="this.innerHTML = findFamiliar(); return false;" title="Familiar">' + findFamiliar() + '</span><span> familiar</span>' : '';
-    var artificerGadget = '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">' + getOutput(characterOptions.artificerInfusion) + '</span>';
-    var rangerCompanion = '<span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic); return false;" title="Beast Buddy">' + getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic) + '</span> Companion';
-    var spyKit = '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.tools); return false;" title="Toolset">' + getOutput(dndItems.tools) + '</span>';
-    var toolSets = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools);
-    var gameClass = {
-      'monk': 'WIS, DEX',
-      'barbarian': 'CON, STR',
-      'warrior': 'STR, CON',
-      'thief': 'DEX, STR',
-      'assassin': 'STR, INT',
-      'spy': 'CHA, WIS',
-      'cleric': 'WIS, CHA',
-      'druid': 'WIS, CON',
-      'paladin': 'STR, CHA',
-      'sorcerer': 'INT, CON',
-      'warlock': 'CHA, DEX',
-      'wizard': 'INT, DEX',
-      'artificer': 'CON, INT',
-      'ranger': 'DEX, WIS',
-      'bard': 'CHA, INT'
+    var system = document.getElementById("NPCsystem").value !== 'random' ? document.getElementById("NPCsystem").value : Math.random() < 0.65 ? 'Default' : Math.random() < 0.4 ? '3d6' : Math.random() < 0.4 ? '4d6' : Math.random() < 0.4 ? 'Borked' : Math.random() < 0.4 ? 'Standard' : Math.random() < 0.4 ? 'Dice' : Math.random() < 0.4 ? 'Point' : 'Cards';
+    var name = document.getElementById("NPCname").value ? document.getElementById("NPCname").value : 'Unnamed';
+    var kind = getKind();
+    var type = getType();
+    var tier = getTier();
+    var level = calculateCharacterLevel(tier);
+    var profession = getOutput(vocations).split(' | ');
+    var professionDetail = profession[0].split(': ');
+    var professionDesc = professionDetail[0] + ': ' + profession[1];
+    var startingGold = calculateStartingGold(tier);
+    var baseNum = calculateBaseNum(kind.size);
+    var bestStats = getBestStats(type);
+    var statsMax = calculateStatmax(tier, baseNum.npcSizeSP);
+    var stats = { 'STR': 0, 'DEX': 0, 'CON': 0, 'INT': 0, 'WIS': 0, 'CHA': 0 };
+    var effort = { 'BAS': 0, 'STA': 0, 'ENH': 0, 'ADV': 0, 'ULT': 0 };
+    var oldstats = pourinSP(stats, effort, bestStats, statsMax);
+    var newstats = systemStatSetup(system, oldstats.stats);
+    var oldeffort = oldstats.effort;
+    var neweffort = systemEffortSetup(system, oldeffort);
+    newstats['CON'] = !isNaN(newstats['CON']) ? +newstats['CON']+baseNum.stats : newstats['CON'] ;
+    var effortArray = Object.values(neweffort);
+    var countersVal = `[${system}] Counters`;
+    defense = !isNaN(newstats['CON']) ? calculateDefense(type, extractNumbersfromString(newstats['CON']), kind.size) : newstats['CON'];
+    var dataDetail = calculateDataRoll(newstats, effortArray, statsMax);
+    var dataRoll = `[Stats:${dataDetail.statTotal}+Effort:${dataDetail.effortTotal}] Total:${statsMax}|${(dataDetail.statTotal + dataDetail.effortTotal)}`;
+    var equipment = getEquipment(type);
+    var abilities = getAbilities(type, newstats, statsMax, dataDetail.statTotal, dataDetail.effortTotal);
+    var health = getRandomIntMaxMin(tier)*10;
+    health = health < 10 ? 10 : health;
+    var charDesc = `Current Hearts: ${health/10} Total. ` + generateCharacterDescription();
+    var abilitiesTotal = abilities;
+    var equipmentTotal = equipment;
+    generateTable(name, level, type, startingGold, professionDesc, professionDetail[1], tier, kind.size, kind.type, newstats, bestStats, effortArray, defense, dataRoll, countersVal, charDesc, abilitiesTotal, equipmentTotal, health);
+  }
+  function pourinSP(stats, effort, best, quantity){
+    var firstStat = best.split(', ');
+    var indexCorrector = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+    var effortIndexCorrector = ['BAS', 'STA', 'ENH', 'ADV', 'ULT'];
+    for (var i = 0; i < quantity; i++) {
+      var index = Math.floor(Math.random() * indexCorrector.length);
+      var effortIndex = Math.floor(Math.random() * effortIndexCorrector.length);
+      Math.random() < 0.5 && stats[firstStat[0]] < 4 ? stats[firstStat[0]] += 1 : Math.random() < 0.5 && stats[firstStat[1]] < 4 ? stats[firstStat[1]] += 1 : Math.random() < 0.5 ? stats[indexCorrector[index]] += 1 : effort[effortIndexCorrector[effortIndex]] += 1;
     }
-    var gameClassEquipment = {
-      'monk': 'shortsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dart (10)<br>prayer beads',
-      'barbarian': 'greataxe<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>handaxe (2)<br>javelin(4)<br>totem',
-      'warrior': 'longsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>chain mail',
-      'thief': 'shortsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger (2)' + spyKit + '<br>grappling hook<br>thieves’ tools<br>leather armor',
-      'assassin': 'dagger (2)<br>dart (10)<br>basic poison' + spyKit + '<br>leather armor<br>thieves’ tools',
-      'spy': 'dagger<br>hand crossbow<br>bolt (10)<br>spyglass' + spyKit + '<br>forged papers',
-      'cleric': 'mace<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>scale mail',
-      'druid': 'wooden staff<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br>wooden shield<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
-      'paladin': 'greatsword<br>shortsword<br>javelin (5)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>chain mail',
-      'sorcerer': 'dagger (2)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span>',
-      'warlock': 'dagger (2)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
-      'wizard': 'dagger<br>component pouch' + wizardFamiliar + '<br>spellbook',
-      'artificer': 'dagger<br><span style="color:orange;" oncontextmenu="this.innerHTML = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools); return false;" title="Toolset">' + toolSets + '</span>' + artificerGadget + '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>studded leather armor',
-      'ranger': 'longbow<br>arrows (20)<br>dagger<br>' + rangerCompanion,
-      'bard': 'rapier<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(genericItem.Instrument); return false;"title="Instrument">' + getOutput(genericItem.Instrument) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger'
+    return { stats, effort }
+  }
+  function systemStatSetup(system, stats){
+    switch (system) {
+      case '3d6':
+        var replaceArray = rollUp3d6();
+        remakeArray(stats, replaceArray);
+        break;
+      case '4d6':
+        var replaceArray = rollUp4d6();
+        remakeArray(stats, replaceArray);
+        break;
+      case 'Borked':
+        var replaceArray = [-1, 0, 1, 1, 2, 4];
+        remakeArray(stats, replaceArray);
+        break;
+      case 'Standard':
+        var replaceArray = [0, 0, 1, 1, 2, 2];
+        remakeArray(stats, replaceArray);
+        break;
+      case 'Dice':
+        var replaceArray = ['d20', 'd12', 'd10', 'd8', 'd6', 'd4'];
+        remakeArray(stats, replaceArray);
+        break;
+      case 'Point':
+        var replaceArray = [0, 0, 0, 0, 0, 0];
+        remakeArray(stats, replaceArray);
+        break;
+      default:
+        break;
     }
-    var stats = { 'STR': 0, 'DEX': 0, 'CON': 0, 'INT': 0, 'WIS': 0, 'CHA': 0 }
-    var nameForm = document.getElementById("NPCname").value;
-    var name = nameForm ? nameForm : 'Unnamed';
+    return stats
+  }
+  function systemEffortSetup(system, stats){
+    switch (system) {
+      case '3d6':
+        break;
+      case '4d6':
+        break;
+      case 'Borked':
+        break;
+      case 'Standard':
+        break;
+      case 'Dice':
+        break;
+      case 'Point':
+        break;
+      default:
+        break;
+    }
+    return stats
+  }
+  function remakeArray(stats, replacement) {
+    var elements = [];
+    for (let i in replacement) {
+      elements.push(String(replacement[i]));
+    }
+    var arr = elements.sort((a, b) => sortByDataString(a, b));
+    while (Object.values(stats).some(val => typeof val === 'number')) {
+      var maxValue = Math.max(...Object.values(stats).filter(val => typeof val === 'number'));
+      var matchingKeys = Object.keys(stats).filter(key => stats[key] === maxValue);
+      shuffleArray(matchingKeys);
+      for (var key of matchingKeys) {
+        stats[key] = arr.shift();
+      }
+    }
+    return stats;
+  }
+  function shuffleArray(array) {
+    // Fisher-Yates shuffle algorithm to shuffle an array
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+  function getKind() {
     var npcForm = document.getElementById("NPCform").value;
-    var kind1;
-    var kind2;
+    var kind = getOutput(races);
+    var size;
+    var type;
     var variableMap = {
       'mediumAll': mediumAll,
       'mediumHumanCommon': mediumHumanCommon,
@@ -3110,45 +3101,44 @@ function resetCount() {
     }
     switch (npcForm) {
       case 'random':
-        var kind = getOutput(races);
-        kind1 = kind.split(': ')[0];
-        switch (kind1) {
+        size = kind.split(': ')[0];
+        switch (size) {
           case 'mediumAll':
           case 'mediumHumanCommon':
           case 'mediumCommon':
           case 'mediumUncommon':
           case 'mediumRare':
-            kind1 = 'Medium';
+            size = 'Medium';
             break;
           default:
-            kind1 = kind1;
+            size = size;
         }
-        kind2 = kind.split(': ')[1];
+        type = kind.split(': ')[1];
         break;
       case 'mediumAll':
       case 'mediumHumanCommon':
       case 'mediumCommon':
       case 'mediumUncommon':
       case 'mediumRare':
-        var kind = getOutput(variableMap[npcForm]);
-        kind1 = 'Medium';
-        kind2 = kind;
+        kind = getOutput(variableMap[npcForm]);
+        size = 'Medium';
+        type = kind;
         break;
       case 'tiny':
       case 'small':
       case 'large':
       case 'huge':
-        var kind = getOutput(races[npcForm]);
-        kind1 = npcForm;
-        kind2 = kind;
+        kind = getOutput(races[npcForm]);
+        size = npcForm;
+        type = kind;
         break;
       case 'Catfolk':
       case 'Doggerel':
       case 'Mousion':
       case 'Pixie':
       case 'Sprite':
-        kind1 = 'Tiny';
-        kind2 = npcForm;
+        size = 'Tiny';
+        type = npcForm;
         break;
       case 'Autognome':
       case 'Gnome (Base)':
@@ -3171,8 +3161,8 @@ function resetCount() {
       case 'Kobold (Urd)':
       case 'Kobold (Dragonwrought)':
       case 'Tabixen':
-        kind1 = 'Small';
-        kind2 = npcForm;
+        size = 'Small';
+        type = npcForm;
         break;
       case 'Aasimar (Fallen)':
       case 'Aasimar (Protector)':
@@ -3252,19 +3242,19 @@ function resetCount() {
       case 'Triton':
       case 'Ursine':
       case 'Vedalken':
-        kind1 = 'Medium';
-        kind2 = npcForm;
+        size = 'Medium';
+        type = npcForm;
         break;
       case 'Cyclops':
       case 'Half-Giant':
       case 'Young Dragon':
-        kind1 = 'Large';
-        kind2 = npcForm;
+        size = 'Large';
+        type = npcForm;
         break;
       case 'Giant':
       case 'Adult Dragon':
-        kind1 = 'Huge';
-        kind2 = npcForm;
+        size = 'Huge';
+        type = npcForm;
         break;
       case 'Animated Object':
       case 'Awakened Animal':
@@ -3276,12 +3266,12 @@ function resetCount() {
       case 'Reborn':
       case 'Troll':
       case 'Warforged':
-        kind1 = ['Tiny', 'Small', 'Medium', 'Large', 'Huge'][Math.floor(Math.random() * 5)];
-        kind2 = npcForm;
+        size = ['Tiny', 'Small', 'Medium', 'Large', 'Huge'][Math.floor(Math.random() * 5)];
+        type = npcForm;
         break;
       case 'Ogre':
-        kind1 = ['Large', 'Huge'][Math.floor(Math.random() * 3)];
-        kind2 = npcForm;
+        size = ['Large', 'Huge'][Math.floor(Math.random() * 3)];
+        type = npcForm;
         break;
       case 'Human (Base)':
       case 'Human (Mark of Finding)':
@@ -3293,8 +3283,8 @@ function resetCount() {
       case 'Plasmoid':
       case 'Tortle':
       case 'Yuan-ti':
-        kind1 = ['Small', 'Medium', 'Large'][Math.floor(Math.random() * 3)];
-        kind2 = npcForm;
+        size = ['Small', 'Medium', 'Large'][Math.floor(Math.random() * 3)];
+        type = npcForm;
         break;
       case 'Amazonian':
       case 'Centaur':
@@ -3303,8 +3293,8 @@ function resetCount() {
       case 'Loxodon':
       case 'Mezzoloth':
       case 'Minotaur':
-        kind1 = ['Medium', 'Large'][Math.floor(Math.random() * 2)];
-        kind2 = npcForm;
+        size = ['Medium', 'Large'][Math.floor(Math.random() * 2)];
+        type = npcForm;
         break;
       case 'Beastfolk':
       case 'Dhampir':
@@ -3320,8 +3310,8 @@ function resetCount() {
       case 'Thri-kreen':
       case 'Verdan':
       case 'Yuan-ti pureblood':
-        kind1 = ['Small', 'Medium'][Math.floor(Math.random() * 2)];
-        kind2 = npcForm;
+        size = ['Small', 'Medium'][Math.floor(Math.random() * 2)];
+        type = npcForm;
         break;
       case 'Fairy':
       case 'Familiar':
@@ -3334,106 +3324,222 @@ function resetCount() {
       case 'Poppet':
       case 'Quasit':
       case 'Quickling':
-        kind1 = ['Tiny', 'Small'][Math.floor(Math.random() * 2)];
-        kind2 = npcForm;
+        size = ['Tiny', 'Small'][Math.floor(Math.random() * 2)];
+        type = npcForm;
         break;
       default:
-        kind1 = kind1;
-        kind2 = npcForm;
+        size = size;
+        type = npcForm;
     }
-    var typeNum = getRandomIntMaxMin(Object.keys(gameClass).length - 1);
-    var type = document.getElementById("NPCtype").value === 'random' ? Object.keys(gameClass)[typeNum] : document.getElementById("NPCtype").value;
-    var tier = document.getElementById("NPCtier").value === 'random' ? getRandomInt(5) : Number(document.getElementById("NPCtier").value);
-    var statArrayNum = [0, 0, 0, 0, 0, 0];
-    var profession = getOutput(vocations).split(' | ');
-    var equipment = document.getElementById("NPCtype").value === 'random' ? gameClassEquipment[Object.keys(gameClass)[typeNum]] : gameClassEquipment[document.getElementById("NPCtype").value];
-    var bestStats = document.getElementById("NPCtype").value === 'random' ? Object.values(gameClass)[typeNum] : gameClass[document.getElementById("NPCtype").value];
-    var extraItem = getOutput(dndItems).split(': ');
-    var firstStat = bestStats.split(', ');
-    var effortArray = [0, 0, 0, 0, 0];
+    return { size, type };
+  }
+  function getType() {
+    var type = document.getElementById("NPCtype").value === 'random' ? Object.keys(gameClass)[getRandomIntMaxMin(Object.keys(gameClass).length - 1)] : document.getElementById("NPCtype").value;
+    return type;
+  }
+  function getTier() {
+    var tierInput = document.getElementById("NPCtier").value;
+    if (tierInput === 'random') {
+      return getRandomInt(5);
+    } else {
+      return Number(tierInput);
+    }
+  }
+  function calculateCharacterLevel(tier) {
+    var minMilestones;
+    var maxMilestones;
+    switch (tier) {
+      case 0:
+        minMilestones = 1;
+        maxMilestones = 1;
+        break;
+      case 1:
+        minMilestones = 1;
+        maxMilestones = 5;
+        break;
+      case 2:
+        minMilestones = 5;
+        maxMilestones = 10;
+        break;
+      case 3:
+        minMilestones = 10;
+        maxMilestones = 15;
+        break;
+      case 4:
+        minMilestones = 15;
+        maxMilestones = 20;
+        break;
+      case 5:
+        minMilestones = 20;
+        maxMilestones = 25;
+        break;
+      default:
+        break;
+    }
+    return Math.floor(Math.random() * (maxMilestones - minMilestones + 1)) + minMilestones;
+  }
+  function calculateStartingGold(tier) {
     var variableGold = +tier * Math.random() < 0.75 ? 10 : Math.random() < 0.75 ? 50 : 100;
-    var startingGold = getRandomIntMaxMin(variableGold) + ' GP';
-    var charLevel = getRandomIntMaxMin(tier * 5, tier * 5 - getRandomIntMaxMin(5));
-    if (charLevel < 1) {
-      charLevel = 1;
-    }
-    var baseNum;
-    switch (kind1) {
+    return getRandomIntMaxMin(variableGold) + ' GP';
+  }
+  function calculateBaseNum(size){
+    var npcSizeSP;
+    var stats;
+    switch (size) {
       case 'tiny':
-        baseNum = 4;
-        stats['CON'] = -2;
+        npcSizeSP = 4;
+        stats = -2;
         break;
       case 'small':
-        baseNum = 6;
-        stats['CON'] = -1;
+        npcSizeSP = 6;
+        stats = -1;
         break;
       case 'mediumRare':
       case 'mediumCommon':
-        baseNum = 8;
-        stats['CON'] = 0;
+        npcSizeSP = 8;
+        stats = 0;
         break;
       case 'large':
-        baseNum = 10;
-        stats['CON'] = 2;
+        npcSizeSP = 10;
+        stats = 2;
         break;
       case 'huge':
-        baseNum = 12;
-        stats['CON'] = 4;
+        npcSizeSP = 12;
+        stats = 4;
         break;
       default:
-        baseNum = 8;
-        stats['CON'] = 0;
+        npcSizeSP = 8;
+        stats = 0;
         break;
     }
-    var maxNum;
+    return { npcSizeSP, stats }
+  }
+  function calculateDefense(type, conNum){
+    var defense = 0;
+    switch (type) {
+      case 'monk':
+        defense += Number(conNum);
+        break;
+      case 'spy':
+        defense += Number(conNum);
+        break;
+      case 'sorcerer':
+        defense += Number(conNum);
+        break;
+      case 'wizard':
+        defense += Number(conNum);
+        break;
+      case 'ranger':
+        defense += Number(conNum);
+        break;
+      case 'bard':
+        defense += Number(conNum);
+        break;
+      case 'barbarian':
+        if (Math.sign(Number(conNum)) === -1) {
+          defense += Math.abs(Number(conNum))
+        } else {
+          defense += Number(conNum) * 2;
+        }
+        break;
+      case 'assassin':
+        defense += Number(conNum) + 1;
+        break;
+      case 'thief':
+        defense += Number(conNum) + 1;
+        break;
+      case 'warlock':
+        defense += Number(conNum) + 1;
+        break;
+      case 'artificer':
+        defense += Number(conNum) + 2;
+        break;
+      case 'druid':
+        defense += Number(conNum) + 1;
+        break;
+      case 'cleric':
+        defense += Number(conNum) + 3;
+        break;
+      case 'paladin':
+        defense += Number(conNum) + 4;
+        break;
+      case 'warrior':
+        defense += Number(conNum) + 5;
+        break;
+    }
+    if(defense > 10){
+      defense = 10;
+    }
+    return defense;
+  }
+  function calculateStatmax(tier, start) {
+    var max;
     switch (tier) {
       case 0:
-        maxNum = baseNum + 4;
+        max = start + 4;
         break;
       case 1:
-        maxNum = baseNum + 8;
+        max = start + 8;
         break;
       case 2:
-        maxNum = baseNum + 10;
+        max = start + 10;
         break;
       case 3:
-        maxNum = baseNum + 12;
+        max = start + 12;
         break;
       case 4:
-        maxNum = baseNum + 14;
+        max = start + 14;
         break;
       case 5:
-        maxNum = baseNum + 16;
+        max = start + 16;
         break;
     }
-    var effortMax = charLevel + baseNum;
-    for (var i = 0; i < effortMax; i++) {
-      var indexCorrector = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
-      var index = Math.floor(Math.random() * indexCorrector.length);
-      var effortIndex = Math.floor(Math.random() * effortArray.length);
-      Math.random() < 0.3 && stats[firstStat[0]] < 5 ? stats[firstStat[0]] += 1 : Math.random() < 0.3 && stats[firstStat[1]] < 5 ? stats[firstStat[1]] += 1 : Math.random() < 0.3 ? stats[indexCorrector[index]] += 1 : effortArray[effortIndex] += 1;
+    max = getRandomInt(max, max-getRandomIntMaxMin(5));
+    return max;
+  }
+  function getEquipment(type) {
+    var wizardFamiliar = Math.random() < 0.5 ? '<br><span style="color:orange;" oncontextmenu="this.innerHTML = findFamiliar(); return false;" title="Familiar">' + findFamiliar() + '</span><span> familiar</span>' : '';
+    var artificerGadget = '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">' + getOutput(characterOptions.artificerInfusion) + '</span>';
+    var rangerCompanion = '<span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic); return false;" title="Beast Buddy">' + getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic) + '</span> Companion';
+    var spyKit = '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.tools); return false;" title="Toolset">' + getOutput(dndItems.tools) + '</span>';
+    var toolSets = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools);
+    var startingPacks = [
+      'backpack (stow below)<br>sack(1)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>lantern<br>oil (flask) (2)<br>tinderbox<br>piton (12)<br>hammer<br>waterskin (4 Glugs)<br>Ration(4)<br>5 GP',
+      'backpack (stow below)<br>sack(2)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>torch(10)<br>oil (flask)(3)<br>tinderbox<br>10’ pole<br>rope (50’)<br>waterskin (4 Glugs)<br>Ration(10)<br>steel mirror',
+      'backpack (stow below)<br>sack(4)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>piton(12)<br>rope (50’)<br>waterskin (4 Glugs)<br>Ration(10)'];
+    var gameClassEquipment = {
+      'monk': 'shortsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dart(10)<br>prayer beads',
+      'barbarian': 'greataxe<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>handaxe(2)<br>javelin(4)<br>totem',
+      'warrior': 'longsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>chain mail',
+      'thief': 'shortsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger(2)' + spyKit + '<br>grappling hook<br>thieves’ tools<br>leather armor',
+      'assassin': 'dagger(2)<br>dart(10)<br>basic poison' + spyKit + '<br>leather armor<br>thieves’ tools',
+      'spy': 'dagger<br>hand crossbow<br>bolt(10)<br>spyglass' + spyKit + '<br>forged papers',
+      'cleric': 'mace<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>scale mail',
+      'druid': 'wooden staff<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br>wooden shield<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
+      'paladin': 'greatsword<br>shortsword<br>javelin(5)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>chain mail',
+      'sorcerer': 'dagger(2)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span>',
+      'warlock': 'dagger(2)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
+      'wizard': 'dagger<br>component pouch' + wizardFamiliar + '<br>spellbook',
+      'artificer': 'dagger<br><span style="color:orange;" oncontextmenu="this.innerHTML = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools); return false;" title="Toolset">' + toolSets + '</span>' + artificerGadget + '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>studded leather armor',
+      'ranger': 'longbow<br>arrows(20)<br>dagger<br>' + rangerCompanion,
+      'bard': 'rapier<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(genericItem.Instrument); return false;"title="Instrument">' + getOutput(genericItem.Instrument) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger'
     }
-    var statTotalArray = [];
-    for (let stat in stats) {
-      statTotalArray.push(stats[stat]);
-    }
-    var statTotal = statTotalArray.reduce((a, b) => a + b, 0);
-    var effortTotal = effortArray.reduce((a, b) => a + b, 0);
+    var extraItem = getOutput(dndItems).split(': ');
+    return gameClassEquipment[type] + '<br>' + getOutput(startingPacks) + `<br><span style="color:red;" title="${extraItem[0]}">${extraItem[1]}</span>`;
+  }
+  function getAbilities(type, stats, max, statTotal, effortTotal){
     var subClass = [];
-    var subClassChoice = getOutput(subClassList).split(': ')[1];
-    var conNum = stats['CON'];
-    var magicNum;
-    var magicalDisc;
-    var magicDisc = '';
+    var secretLanguages = '';
+    var charMagicDiscipline = '';
+    var charSnapSpell = '';
+    var charKnownSpell = '';
+    var charPrepSpell = '';
+    var magicDisc = [];
     for (var i = 0; i < 3; i++) {
-      magicDisc += getOutput(magicDiscipline);
-      if (i === 2) {
-        magicDisc += '<br>';
-      } else {
-        magicDisc += ', ';
-      }
+      magicDisc.push(getOutput(magicDiscipline));
     }
-    var varDEF = 0;
+    var subClassChoice = getOutput(subClassList).split(': ')[1];
+    var charAbilities;
     switch (type) {
       case 'monk':
         subClass.push(subClassList['AstralWay']);
@@ -3449,112 +3555,7 @@ function resetCount() {
         subClass.push(subClassList['SunSoulWay']);
         subClass.push(subClassList['TranquilWay']);
         subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum);
-        break;
-      case 'spy':
-        subClass.push(subClassList['ClockworkRing']);
-        subClass.push(subClassList['GraveRing']);
-        subClass.push(subClassList['MasterRing']);
-        subClass.push(subClassList['NaturalRing']);
-        subClass.push(subClassList['SpellRing']);
-        subClass.push(subClassList['AvatarOrder']);
-        subClass.push(subClassList['AwakenedOrder']);
-        subClass.push(subClassList['DevotedOrder']);
-        subClass.push(subClassList['ImmortalOrder']);
-        subClass.push(subClassList['NomadOrder']);
-        subClass.push(subClassList['PsiOrderOptions']);
-        subClass.push(subClassList['SoulKnifeOrder']);
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum);
-        break;
-      case 'sorcerer':
-        subClass.push(subClassList['AberrantOrigin']);
-        subClass.push(subClassList['ClockworkOrigin']);
-        subClass.push(subClassList['DivineOrigin']);
-        subClass.push(subClassList['DraconicOrigin']);
-        subClass.push(subClassList['GiantOrigin']);
-        subClass.push(subClassList['LunarOrigin']);
-        subClass.push(subClassList['PhoenixOrigin']);
-        subClass.push(subClassList['PyromancerOrigin']);
-        subClass.push(subClassList['SeaOrigin']);
-        subClass.push(subClassList['ShadowOrigin']);
-        subClass.push(subClassList['StoneOrigin']);
-        subClass.push(subClassList['StormOrigin']);
-        subClass.push(subClassList['WildMagicOrigin']);
-        subClass.push(subClassList['MythkeepMage']);
-        subClass.push(subClassList['PrionotaMage']);
-        subClass.push(subClassList['QuotaxMage']);
-        subClass.push(subClassList['RuneScribeMage']);
-        subClass.push(subClassList['ElorquillMage']);
-        subClass.push(subClassList['WiltBlossomMage']);
-        magicalDisc = magicDisc;
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum);
-        break;
-      case 'wizard':
-        subClass.push(subClassList['AbjurationTradition']);
-        subClass.push(subClassList['BladesongTradition']);
-        subClass.push(subClassList['ChronurgyTradition']);
-        subClass.push(subClassList['ConjurationTradition']);
-        subClass.push(subClassList['DivinationTradition']);
-        subClass.push(subClassList['EnchantmentTradition']);
-        subClass.push(subClassList['EvocationTradition']);
-        subClass.push(subClassList['GraviturgyTradition']);
-        subClass.push(subClassList['IllusionTradition']);
-        subClass.push(subClassList['NecromancyTradition']);
-        subClass.push(subClassList['ScribeTradition']);
-        subClass.push(subClassList['TransmutationTradition']);
-        subClass.push(subClassList['WarMageTradition']);
-        subClass.push(subClassList['MythkeepMage']);
-        subClass.push(subClassList['PrionotaMage']);
-        subClass.push(subClassList['QuotaxMage']);
-        subClass.push(subClassList['RuneScribeMage']);
-        subClass.push(subClassList['ElorquillMage']);
-        subClass.push(subClassList['WiltBlossomMage']);
-        magicalDisc = magicDisc;
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum);
-        break;
-      case 'ranger':
-        subClass.push(subClassList['AmbuscadeConclave']);
-        subClass.push(subClassList['BeastConclave']);
-        subClass.push(subClassList['DeepStalkerConclave']);
-        subClass.push(subClassList['DrakeConclave']);
-        subClass.push(subClassList['FeralConclave']);
-        subClass.push(subClassList['FaeConclave']);
-        subClass.push(subClassList['GloomConclave']);
-        subClass.push(subClassList['GuardianConclave']);
-        subClass.push(subClassList['HorizonConclave']);
-        subClass.push(subClassList['HunterConclave']);
-        subClass.push(subClassList['SlayerConclave']);
-        subClass.push(subClassList['SwarmConclave']);
-        subClass.push(subClassList['CavalierStyle']);
-        subClass.push(subClassList['ArcaneArcherStyle']);
-        subClass.push(subClassList['ArcaneArcherOptions']);
-        subClass.push(subClassList['ScoutStyle']);
-        magicalDisc = getOutput(magicDiscipline) + '<br>';
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum);
-        break;
-      case 'bard':
-        subClass.push(subClassList['CreationCollege']);
-        subClass.push(subClassList['EloquenceCollege']);
-        subClass.push(subClassList['GlamourCollege']);
-        subClass.push(subClassList['LoreCollege']);
-        subClass.push(subClassList['SatireCollege']);
-        subClass.push(subClassList['SpiritCollege']);
-        subClass.push(subClassList['SwordCollege']);
-        subClass.push(subClassList['ValorCollege']);
-        subClass.push(subClassList['WhisperCollege']);
-        subClass.push(subClassList['MythkeepMage']);
-        subClass.push(subClassList['PrionotaMage']);
-        subClass.push(subClassList['QuotaxMage']);
-        subClass.push(subClassList['RuneScribeMage']);
-        subClass.push(subClassList['ElorquillMage']);
-        subClass.push(subClassList['WiltBlossomMage']);
-        magicalDisc = magicDisc;
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum);
+        charAbilities = ['Pool of Ki', 'Flurry of Blows', 'Ki-Fueled Strike'];
         break;
       case 'barbarian':
         subClass.push(subClassList['AncestralGuardianPath']);
@@ -3567,11 +3568,48 @@ function resetCount() {
         subClass.push(subClassList['WildMagicPath']);
         subClass.push(subClassList['ZealotPath']);
         subClassChoice = getOutput(subClass);
-        if (Math.sign(Number(conNum)) === -1) {
-          varDEF += Math.abs(Number(conNum))
-        } else {
-          varDEF += Number(conNum) * 2;
-        }
+        charAbilities = ['Pool of Grit', 'Rage', 'Unarmored Defense'];
+        break;
+      case 'warrior':
+        subClass.push(subClassList['ArcaneArcherStyle']);
+        subClass.push(subClassList['ArcaneArcherOptions']);
+        subClass.push(subClassList['BanneretStyle']);
+        subClass.push(subClassList['BattleMasterStyle']);
+        subClass.push(subClassList['BattleMasterOptions']);
+        subClass.push(subClassList['BruteStyle']);
+        subClass.push(subClassList['CavalierStyle']);
+        subClass.push(subClassList['ChampionStyle']);
+        subClass.push(subClassList['EchoKnightStyle']);
+        subClass.push(subClassList['EldritchKnightStyle']);
+        subClass.push(subClassList['KnightStyle']);
+        subClass.push(subClassList['MonsterHunterStyle']);
+        subClass.push(subClassList['PsiWarriorStyle']);
+        subClass.push(subClassList['RuneKnightStyle']);
+        subClass.push(subClassList['RuneKnightOptions']);
+        subClass.push(subClassList['SamuraiStyle']);
+        subClass.push(subClassList['ScoutStyle']);
+        subClass.push(subClassList['SharpShooterStyle']);
+        subClassChoice = getOutput(subClass);
+        charAbilities = ['Pool of Grit', 'Second Wind', 'Opportunity Attacks'];
+        break;
+      case 'thief':
+        subClass.push(subClassList['LookoutDen']);
+        subClass.push(subClassList['MasterMindDen']);
+        subClass.push(subClassList['PhantomDen']);
+        subClass.push(subClassList['SoulKnifeDen']);
+        subClass.push(subClassList['SwashbucklerDen']);
+        subClass.push(subClassList['TricksterDen']);
+        subClass.push(subClassList['AvatarOrder']);
+        subClass.push(subClassList['AwakenedOrder']);
+        subClass.push(subClassList['DevotedOrder']);
+        subClass.push(subClassList['ImmortalOrder']);
+        subClass.push(subClassList['NomadOrder']);
+        subClass.push(subClassList['PsiOrderOptions']);
+        subClass.push(subClassList['SoulKnifeOrder']);
+        subClassChoice = getOutput(subClass);
+        var doubleProficiency = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
+        secretLanguages = '(Secret Language) Thieves’ Cant<br>';
+        charAbilities = ['Pool of Bits', 'Opportunity Attacks'];
         break;
       case 'assassin':
         subClass.push(subClassList['CharmingSlew']);
@@ -3590,16 +3628,15 @@ function resetCount() {
         subClass.push(subClassList['PsiOrderOptions']);
         subClass.push(subClassList['SoulKnifeOrder']);
         subClassChoice = getOutput(subClass);
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 1;
+        var doubleProficiency = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
+        charAbilities = ['Pool of Bits', 'Assassinate'];
         break;
-      case 'thief':
-        subClass.push(subClassList['LookoutDen']);
-        subClass.push(subClassList['MasterMindDen']);
-        subClass.push(subClassList['PhantomDen']);
-        subClass.push(subClassList['SoulKnifeDen']);
-        subClass.push(subClassList['SwashbucklerDen']);
-        subClass.push(subClassList['TricksterDen']);
+      case 'spy':
+        subClass.push(subClassList['ClockworkRing']);
+        subClass.push(subClassList['GraveRing']);
+        subClass.push(subClassList['MasterRing']);
+        subClass.push(subClassList['NaturalRing']);
+        subClass.push(subClassList['SpellRing']);
         subClass.push(subClassList['AvatarOrder']);
         subClass.push(subClassList['AwakenedOrder']);
         subClass.push(subClassList['DevotedOrder']);
@@ -3608,71 +3645,8 @@ function resetCount() {
         subClass.push(subClassList['PsiOrderOptions']);
         subClass.push(subClassList['SoulKnifeOrder']);
         subClassChoice = getOutput(subClass);
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 1;
-        break;
-      case 'warlock':
-        subClass.push(subClassList['MythkeepMage']);
-        subClass.push(subClassList['PrionotaMage']);
-        subClass.push(subClassList['QuotaxMage']);
-        subClass.push(subClassList['RuneScribeMage']);
-        subClass.push(subClassList['ElorquillMage']);
-        subClass.push(subClassList['WiltBlossomMage']);
-        subClass.push(subClassList['ArchfaePact']);
-        subClass.push(subClassList['CelestialPact']);
-        subClass.push(subClassList['FathomlessPact']);
-        subClass.push(subClassList['FiendPact']);
-        subClass.push(subClassList['GeniePact']);
-        subClass.push(subClassList['GenieAirOption']);
-        subClass.push(subClassList['GenieEarthOption']);
-        subClass.push(subClassList['GenieFireOption']);
-        subClass.push(subClassList['GenieWaterOption']);
-        subClass.push(subClassList['HexbladePact']);
-        subClass.push(subClassList['OldOnePact']);
-        subClass.push(subClassList['UndeadPact']);
-        subClass.push(subClassList['UndyingPact']);
-        magicalDisc = magicDisc;
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 1;
-        break;
-      case 'artificer':
-        subClass.push(subClassList['AlchemistSpecialist']);
-        subClass.push(subClassList['AlchemicalSpecialist']);
-        subClass.push(subClassList['ArmorerSpecialist']);
-        subClass.push(subClassList['ArtilleristSpecialist']);
-        subClass.push(subClassList['BattleSmithSpecialist']);
-        subClass.push(subClassList['GunsmithSpecialist']);
-        subClass.push(subClassList['MythkeepMage']);
-        subClass.push(subClassList['PrionotaMage']);
-        subClass.push(subClassList['QuotaxMage']);
-        subClass.push(subClassList['RuneScribeMage']);
-        subClass.push(subClassList['ElorquillMage']);
-        subClass.push(subClassList['WiltBlossomMage']);
-        magicalDisc = magicDisc;
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 2;
-        break;
-      case 'druid':
-        subClass.push(subClassList['DreamsCircle']);
-        subClass.push(subClassList['LandCircle']);
-        subClass.push(subClassList['LandCircleArctic']);
-        subClass.push(subClassList['LandCircleCoast']);
-        subClass.push(subClassList['LandCircleDesert']);
-        subClass.push(subClassList['LandCircleForest']);
-        subClass.push(subClassList['LandCircleGrass']);
-        subClass.push(subClassList['LandCircleMount']);
-        subClass.push(subClassList['LandCircleSwamp']);
-        subClass.push(subClassList['LandCircleUnder']);
-        subClass.push(subClassList['MoonCircle']);
-        subClass.push(subClassList['PrimevalCircle']);
-        subClass.push(subClassList['ShepherdCircle']);
-        subClass.push(subClassList['SporesCircle']);
-        subClass.push(subClassList['StarsCircle']);
-        subClass.push(subClassList['TwilightCircle']);
-        subClass.push(subClassList['WildfireCircle']);
-        magicalDisc = magicDisc;
-        subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 1;
+        var doubleProficiency = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
+        charAbilities = ['Pool of Bits', 'Cunning Action'];
         break;
       case 'cleric':
         subClass.push(subClassList['AmbitionDomain']);
@@ -3696,9 +3670,37 @@ function resetCount() {
         subClass.push(subClassList['TwilightDomain']);
         subClass.push(subClassList['WarDomain']);
         subClass.push(subClassList['ZealDomain']);
-        magicalDisc = magicDisc;
         subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 3;
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Channel Divinity'];
+        break;
+      case 'druid':
+        subClass.push(subClassList['DreamsCircle']);
+        subClass.push(subClassList['LandCircle']);
+        subClass.push(subClassList['LandCircleArctic']);
+        subClass.push(subClassList['LandCircleCoast']);
+        subClass.push(subClassList['LandCircleDesert']);
+        subClass.push(subClassList['LandCircleForest']);
+        subClass.push(subClassList['LandCircleGrass']);
+        subClass.push(subClassList['LandCircleMount']);
+        subClass.push(subClassList['LandCircleSwamp']);
+        subClass.push(subClassList['LandCircleUnder']);
+        subClass.push(subClassList['MoonCircle']);
+        subClass.push(subClassList['PrimevalCircle']);
+        subClass.push(subClassList['ShepherdCircle']);
+        subClass.push(subClassList['SporesCircle']);
+        subClass.push(subClassList['StarsCircle']);
+        subClass.push(subClassList['TwilightCircle']);
+        subClass.push(subClassList['WildfireCircle']);
+        subClassChoice = getOutput(subClass);
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Wild Shape'];
         break;
       case 'paladin':
         subClass.push(subClassList['AncientsOath']);
@@ -3711,77 +3713,239 @@ function resetCount() {
         subClass.push(subClassList['TreacheryOath']);
         subClass.push(subClassList['VengeanceOath']);
         subClass.push(subClassList['WatchersOath']);
-        magicalDisc = getOutput(magicDiscipline) + '<br>';
         subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 4;
+        charMagicDiscipline = `(Magic Disciplines) ${getOutput(magicDiscipline)}<br>`
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Opportunity Attacks'];
         break;
-      case 'warrior':
+      case 'sorcerer':
+        subClass.push(subClassList['AberrantOrigin']);
+        subClass.push(subClassList['ClockworkOrigin']);
+        subClass.push(subClassList['DivineOrigin']);
+        subClass.push(subClassList['DraconicOrigin']);
+        subClass.push(subClassList['GiantOrigin']);
+        subClass.push(subClassList['LunarOrigin']);
+        subClass.push(subClassList['PhoenixOrigin']);
+        subClass.push(subClassList['PyromancerOrigin']);
+        subClass.push(subClassList['SeaOrigin']);
+        subClass.push(subClassList['ShadowOrigin']);
+        subClass.push(subClassList['StoneOrigin']);
+        subClass.push(subClassList['StormOrigin']);
+        subClass.push(subClassList['WildMagicOrigin']);
+        subClass.push(subClassList['MythkeepMage']);
+        subClass.push(subClassList['PrionotaMage']);
+        subClass.push(subClassList['QuotaxMage']);
+        subClass.push(subClassList['RuneScribeMage']);
+        subClass.push(subClassList['ElorquillMage']);
+        subClass.push(subClassList['WiltBlossomMage']);
+        subClassChoice = getOutput(subClass);
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Font of Magic'];
+        break;
+      case 'warlock':
+        subClass.push(subClassList['MythkeepMage']);
+        subClass.push(subClassList['PrionotaMage']);
+        subClass.push(subClassList['QuotaxMage']);
+        subClass.push(subClassList['RuneScribeMage']);
+        subClass.push(subClassList['ElorquillMage']);
+        subClass.push(subClassList['WiltBlossomMage']);
+        subClass.push(subClassList['ArchfaePact']);
+        subClass.push(subClassList['CelestialPact']);
+        subClass.push(subClassList['FathomlessPact']);
+        subClass.push(subClassList['FiendPact']);
+        subClass.push(subClassList['GeniePact']);
+        subClass.push(subClassList['GenieAirOption']);
+        subClass.push(subClassList['GenieEarthOption']);
+        subClass.push(subClassList['GenieFireOption']);
+        subClass.push(subClassList['GenieWaterOption']);
+        subClass.push(subClassList['HexbladePact']);
+        subClass.push(subClassList['OldOnePact']);
+        subClass.push(subClassList['UndeadPact']);
+        subClass.push(subClassList['UndyingPact']);
+        subClassChoice = getOutput(subClass);
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        var eldritchInvocation = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(characterOptions.eldritchInvocation); return false;" title="Invocation">${getOutput(characterOptions.eldritchInvocation)} (Invocation)</span>`;
+        charAbilities = ['Pact Magic', eldritchInvocation];
+        break;
+      case 'wizard':
+        subClass.push(subClassList['AbjurationTradition']);
+        subClass.push(subClassList['BladesongTradition']);
+        subClass.push(subClassList['ChronurgyTradition']);
+        subClass.push(subClassList['ConjurationTradition']);
+        subClass.push(subClassList['DivinationTradition']);
+        subClass.push(subClassList['EnchantmentTradition']);
+        subClass.push(subClassList['EvocationTradition']);
+        subClass.push(subClassList['GraviturgyTradition']);
+        subClass.push(subClassList['IllusionTradition']);
+        subClass.push(subClassList['NecromancyTradition']);
+        subClass.push(subClassList['ScribeTradition']);
+        subClass.push(subClassList['TransmutationTradition']);
+        subClass.push(subClassList['WarMageTradition']);
+        subClass.push(subClassList['MythkeepMage']);
+        subClass.push(subClassList['PrionotaMage']);
+        subClass.push(subClassList['QuotaxMage']);
+        subClass.push(subClassList['RuneScribeMage']);
+        subClass.push(subClassList['ElorquillMage']);
+        subClass.push(subClassList['WiltBlossomMage']);
+        subClassChoice = getOutput(subClass);
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Full Caster'];
+        break;
+      case 'artificer':
+        subClass.push(subClassList['AlchemistSpecialist']);
+        subClass.push(subClassList['AlchemicalSpecialist']);
+        subClass.push(subClassList['ArmorerSpecialist']);
+        subClass.push(subClassList['ArtilleristSpecialist']);
+        subClass.push(subClassList['BattleSmithSpecialist']);
+        subClass.push(subClassList['GunsmithSpecialist']);
+        subClass.push(subClassList['MythkeepMage']);
+        subClass.push(subClassList['PrionotaMage']);
+        subClass.push(subClassList['QuotaxMage']);
+        subClass.push(subClassList['RuneScribeMage']);
+        subClass.push(subClassList['ElorquillMage']);
+        subClass.push(subClassList['WiltBlossomMage']);
+        subClassChoice = getOutput(subClass);
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        var infusionAbility = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">${getOutput(characterOptions.artificerInfusion)} (Infusion)</span>`;
+        charAbilities = [infusionAbility];
+        break;
+      case 'ranger':
+        subClass.push(subClassList['AmbuscadeConclave']);
+        subClass.push(subClassList['BeastConclave']);
+        subClass.push(subClassList['DeepStalkerConclave']);
+        subClass.push(subClassList['DrakeConclave']);
+        subClass.push(subClassList['FeralConclave']);
+        subClass.push(subClassList['FaeConclave']);
+        subClass.push(subClassList['GloomConclave']);
+        subClass.push(subClassList['GuardianConclave']);
+        subClass.push(subClassList['HorizonConclave']);
+        subClass.push(subClassList['HunterConclave']);
+        subClass.push(subClassList['SlayerConclave']);
+        subClass.push(subClassList['SwarmConclave']);
+        subClass.push(subClassList['CavalierStyle']);
         subClass.push(subClassList['ArcaneArcherStyle']);
         subClass.push(subClassList['ArcaneArcherOptions']);
-        subClass.push(subClassList['BanneretStyle']);
-        subClass.push(subClassList['BattleMasterStyle']);
-        subClass.push(subClassList['BattleMasterOptions']);
-        subClass.push(subClassList['BruteStyle']);
-        subClass.push(subClassList['CavalierStyle']);
-        subClass.push(subClassList['ChampionStyle']);
-        subClass.push(subClassList['EchoKnightStyle']);
-        subClass.push(subClassList['EldritchKnightStyle']);
-        subClass.push(subClassList['KnightStyle']);
-        subClass.push(subClassList['MonsterHunterStyle']);
-        subClass.push(subClassList['PsiWarriorStyle']);
-        subClass.push(subClassList['RuneKnightStyle']);
-        subClass.push(subClassList['RuneKnightOptions']);
-        subClass.push(subClassList['SamuraiStyle']);
         subClass.push(subClassList['ScoutStyle']);
-        subClass.push(subClassList['SharpShooterStyle']);
         subClassChoice = getOutput(subClass);
-        varDEF += Number(conNum) + 5;
+        charMagicDiscipline = `(Magic Disciplines) ${getOutput(magicDiscipline)}<br>`
+        charSnapSpell = `(Snap Spell) hunter’s mark, <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span>, <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Call Companion'];
+        break;
+      case 'bard':
+        subClass.push(subClassList['CreationCollege']);
+        subClass.push(subClassList['EloquenceCollege']);
+        subClass.push(subClassList['GlamourCollege']);
+        subClass.push(subClassList['LoreCollege']);
+        subClass.push(subClassList['SatireCollege']);
+        subClass.push(subClassList['SpiritCollege']);
+        subClass.push(subClassList['SwordCollege']);
+        subClass.push(subClassList['ValorCollege']);
+        subClass.push(subClassList['WhisperCollege']);
+        subClass.push(subClassList['MythkeepMage']);
+        subClass.push(subClassList['PrionotaMage']);
+        subClass.push(subClassList['QuotaxMage']);
+        subClass.push(subClassList['RuneScribeMage']);
+        subClass.push(subClassList['ElorquillMage']);
+        subClass.push(subClassList['WiltBlossomMage']);
+        subClassChoice = getOutput(subClass);
+        charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
+        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charAbilities = ['Inspiration'];
         break;
     }
-    if (varDEF > 10) {
-      varDEF = 10;
+    var lingual = getRandomInt(stats['INT']);
+    var charLanguages = 'Common';
+    for (var i = 0; i < lingual; i++) {
+      charLanguages += ', ' + (Math.random() < 0.7 ? getOutput(languages.common) : Math.random() < 0.7 ? getOutput(languages.uncommon) : getOutput(languages.rare));
     }
-    var dataRoll = `[${statTotal}+${effortTotal}]${(statTotal + effortTotal)}/${maxNum} ` + effortMax;
+    var skillList = '';
+    var skilled = getRandomInt(stats['INT']);
+    skilled ? skillList += '(Proficiency) ' : '';
+    for (var i = 0; i < skilled; i++) {
+      skillList += '<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">' + getOutput(proficiency) + '</span>';
+      if (i != skilled - 1 && skilled > 1) {
+        skillList += ', ';
+      }
+    }
+    skilled ? skillList += '<br>' : '';
+    let abilitiesString = '';
+    for (let i = 0; i < charAbilities.length; i++) {
+      abilitiesString += '(Ability) ';
+      abilitiesString += charAbilities[i];
+      abilitiesString += '<br>';
+    }
     var negativeAbil = '';
-    var abilNum = Number(maxNum - (effortTotal + statTotal));
+    var abilNum = Number(max - (effortTotal + statTotal));
     if (Math.sign(abilNum) === -1) {
+      negativeAbil = '';
       for (var i = 0; i < Math.abs(abilNum); i++) {
         if (i < 5) {
           negativeAbil += getOutput(characterAdd.negatives) + '<br>'
         }
       }
     }
+    var otherAbil = '';
     abilNum < 0 ? abilNum = 0 : abilNum = abilNum;
-    var skillList = '';
-    var lingual = getRandomInt(stats['INT']);
-    var skilled = getRandomInt(stats['INT']);
-    for (var i = 0; i < skilled; i++) {
-      skillList += '<span style=oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">' + getOutput(proficiency) + '</span>';
-      if (i != skilled - 1 && skilled > 1) {
-        skillList += ', ';
-      }
-    }
-    var abilities = ' (Languages) Common';
-    for (var i = 0; i < lingual; i++) {
-      abilities += ', ' + (Math.random() < 0.7 ? getOutput(languages.common) : Math.random() < 0.7 ? getOutput(languages.uncommon) : getOutput(languages.rare));
-    }
-    abilities += gameClassAbilityBase(type);
-    magicalDisc ? abilities += '<br>(Magic Disciplines) ' + magicalDisc : '';
-    abilities += ' (Other Abilities) ';
-    abilities += negativeAbil;
     for (var i = 0; i < abilNum; i++) {
-      abilities += + Math.random() < 0.4 ? getOutput(anyClassAbility) : Math.random() < 0.4 ? getOutput(gameClassAbility[type]) : Math.random() < 0.4 ? getOutput(characterOptions).split(': ')[1] : Math.random() < 0.4 ? getOutput(subClassChoice) : Math.random() < 0.4 ? getOutput(characterAdd).split(': ')[1] : getOutput(npcAbilities);
-      abilities += '<br>';
+      otherAbil += + Math.random() < 0.4 ? getOutput(anyClassAbility) : Math.random() < 0.4 ? getOutput(gameClassAbility[type]) : Math.random() < 0.4 ? getOutput(characterOptions).split(': ')[1] : Math.random() < 0.4 ? getOutput(subClassChoice) : Math.random() < 0.4 ? getOutput(characterAdd).split(': ')[1] : getOutput(npcAbilities);
+      otherAbil += '<br>';
     }
-    if (skillList.length > 1) {
-      abilities += ' (Additional Proficiency) ' + skillList + '<br>';
+    var abilities =
+`(Languages) ${charLanguages}<br>
+${secretLanguages}
+${charMagicDiscipline}
+${charSnapSpell}
+${charPrepSpell}
+${charKnownSpell}
+${skillList}
+${doubleProficiency ? `(Double Proficiency) ${doubleProficiency}<br>` : ''}
+${abilitiesString}
+${otherAbil ? '(Other Abilities)' : ''}
+${otherAbil}
+${negativeAbil ? '(Quirks)' : ''}
+${negativeAbil}`;
+    return abilities;
+  }
+  function getBestStats(type) {
+    return document.getElementById("NPCtype").value === 'random' ? gameClass[type] : gameClass[document.getElementById("NPCtype").value];
+  }
+  function calculateDataRoll(stats, effort, max) {
+    var statTotalArray = [];
+    if(!isNaN(stats['STR'])){
+      for (let stat in stats) {
+        stat !== 'HP' ? statTotalArray.push(Number(stats[stat])) : statTotalArray.push(Number((stats[stat]/10)-1));
+      }
+    }else{
+      statTotalArray = [Math.floor(max-getRandomInt(max)/2)];
     }
-    var abilitiesTotal = abilities;
-    var equipmentTotal = equipment + `<br>${getOutput(startingPacks)}<br><span style="color:red;" title="${extraItem[0]}">${extraItem[1]}</span>`;
-    var dataCount = 'Counters';
+    var effortTotalArray = [];
+    for (let efforts in effort) {
+      effortTotalArray.push(effort[efforts]);
+    }
+    var statTotal = statTotalArray.reduce((a, b) => a + b, 0);
+    var effortTotal = effortTotalArray.reduce((a, b) => a + b, 0);
+    return { statTotal, effortTotal }
+  }
+  function generateCharacterDescription() {
     var alignment = getOutput(characterDetails.thisAlignment);
     var charDesc = alignment.charAt(0).toUpperCase() + alignment.slice(1) + ` personality, ${getOutput(characterDetails.physique)} physique with a ${getOutput(characterDetails.face)} face/jaw, ${getOutput(characterDetails.skin)} skin, ${getOutput(characterDetails.hair)} hair that is otherwise ${getOutput(colorList)} colored. They wear ${getOutput(characterDetails.clothing)} clothing and ${getOutput(characterSpeaks.frequency) + ` speak ${getOutput(characterSpeaks.speak)} with ` + getOutput(characterSpeaks.profanity)} profanity${getOutput(characterSpeaks.condition)}. ${longAgo()} (Virtues: ${getOutput(characterMore.virtue)} | Vices: ${getOutput(characterMore.vice)} | Flaws: ${getOutput(characterMore.flaws)})`;
-    generateTable(name, charLevel, type, startingGold, profession[1], profession[0], tier, kind1, kind2, stats, bestStats, effortArray, varDEF, dataRoll, dataCount, charDesc, abilitiesTotal, equipmentTotal);
+    return charDesc;
   }
   function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
@@ -3801,26 +3965,22 @@ function resetCount() {
     if (b === null) {
       return -1;
     }
-    if (isNumber(extractNumbersfromString(a))) {
-      a = extractNumbersfromString(a);
+    var numA = parseFloat(a);
+    var numB = parseFloat(b);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      if (numA > numB) return -1;
+      if (numA < numB) return 1;
+      return 0; // Numeric values are equal
     }
-    if (isNumber(extractNumbersfromString(b))) {
-      b = extractNumbersfromString(b);
-    }
-    if (isNumber(a) && isNumber(b)) {
-      if (parseInt(a, 10) === parseInt(b, 10)) { return 0; }
-      return parseInt(a, 10) > parseInt(b, 10) ? -1 : 1;
-    }
-    if (isNumber(a)) {
-      return -1;
-    }
-    if (isNumber(b)) {
+    if (!isNaN(numA)) {
+      if (numA < 0) return -1; // Treat negative numbers as less
       return 1;
     }
-    if (a === b) {
-      return 0;
+    if (!isNaN(numB)) {
+      if (numB < 0) return 1; // Treat negative numbers as greater
+      return -1;
     }
-    return a > b ? 1 : -1;
+    return a.localeCompare(b); // For non-numeric values
   }
   function calculateSpell() {
     var disc = Number(document.getElementById("calcDisc").value);
@@ -3897,6 +4057,26 @@ function resetCount() {
     var hpAverage = (Number(num) * ((Number(size) + 1) / 2)) + Number(num) * Number(con);
     document.getElementById("calcHPDice").innerText = hpDice;
     document.getElementById("calcHPAverage").innerText = Math.floor(hpAverage);
+  }
+  function calculateCC() {
+    var cart = document.getElementById('calcCart').value;
+    var pulled = Number(document.getElementById('calcPulled').value) !== 0 ? 3 : 1;
+    var cartMultiplier = Number(document.getElementById('calcCart').value) !== 0 ? 5 : 1;
+    var size = document.getElementById('calcCCS').value;
+    var strength = (Number(document.getElementById('calcCCSTR').value)*2)+10;
+    var movement = document.getElementById('calcMVMNT').value ? document.getElementById('calcCCMVMNT').value : 0;
+    // size*5*strength
+    // if cart speed daytravel calc w cart else daytravel
+    var carrycapacity = size*2.5*cartMultiplier*strength-cart;
+    var pushdraglift = carrycapacity*2;
+    var carryslots = (strength*2)+(cart/cartMultiplier);
+    var hourtravel = Math.floor(movement/10);
+    var daytravel = hourtravel*8*pulled;
+    document.getElementById('calcCC').value = carrycapacity;
+    document.getElementById('calcPDL').value = pushdraglift;
+    document.getElementById('calcCS').value = carryslots;
+    document.getElementById('calcDaySpeed').value = daytravel;
+    document.getElementById('calcHourSpeed').value = hourtravel;
   }
   function calculateMovement() {
     var running = Number(document.getElementById('calcRJ').value);
@@ -4147,6 +4327,16 @@ function resetCount() {
       tokenElement.style.filter = currentStyle;
     }
   }
+  function removeTable(table){
+    var removeMe = table.parentNode.parentNode.parentNode.parentNode;
+    var u_id = table.closest('table').getAttribute('table-id');
+    var tokens = JSON.parse(localStorage.getItem('tokens')) || [];
+    var existingToken = tokens.find(token => token.u_id === u_id);
+    if(existingToken){
+      removeToken(removeMe.closest('table').getAttribute('table-id'));
+    }
+    removeMe.remove();
+  }
   function removeToken(tokenElement) {
     var savedTokens = JSON.parse(localStorage.getItem('tokens')) || [];
     var updatedTokens = savedTokens.filter((pieceData) => {
@@ -4167,9 +4357,17 @@ function resetCount() {
     var tokenName = document.querySelector(`div[data-uniqid="${tokenPiece}"]`);
   }
   var isDragging = false;
+  var shiftKeyPress = false;
+  document.addEventListener('mouseup', function (event){
+    if (event.shiftKey) {
+      shiftKeyPress = true;
+    } else {
+      shiftKeyPress = false;
+    }
+  });
   document.addEventListener('click', function (event){
     var item = event.target.closest('.draggable');
-    event.shiftKey ? swapColor(item) : '';
+    shiftKeyPress && item ? swapColor(item) : '';
   });
   document.addEventListener('mousedown', function (event) {
     var dragElement = event.target.closest('.draggable');
