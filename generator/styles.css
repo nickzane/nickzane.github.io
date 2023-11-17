@@ -82,12 +82,41 @@ h4 {
   filter: invert(1);
 }
 
+.dark-mode .hl{
+  color:#000;
+  background:#CCC;
+}
+
 .dark-mode .black{
   color:#CCC;
 }
 
+.dark-mode .blue{
+  color:#55A;
+}
+
+.dark-mode .red{
+  color:#C33;
+}
+
+.dark-mode .orange{
+  color:#773;
+}
+
 .black{
   color:#000;
+}
+
+.blue{
+  color:blue;
+}
+
+.red{
+  color:red;
+}
+
+.orange{
+  color:orange;
 }
 
 .right{

@@ -1,12 +1,31 @@
 var abilitySet = [...srdabilityDesc, ...abilityDesc];
 var creatureSet = [...srdCreatureDesc, ...npcDragonDesc, ...npcCreatureDesc];
 var npcSet = [...npcCharDesc, ...custCharDesc];
+
 document.addEventListener('DOMContentLoaded', function () {
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  const body = document.body;
+  var darkModeToggle = document.getElementById('darkModeToggle');
+  var body = document.body;
   darkModeToggle.addEventListener('change', function () {
     body.classList.toggle('dark-mode', darkModeToggle.unchecked);
   });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  var targetNode = document.getElementById("NPCgenerated");
+  var config = { attributes: true, childList: true, subtree: true };
+  var callback = (mutationList, observer) => {
+    for (let mutation of mutationList) {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'TABLE') {
+            setupEventListeners(node);
+          }
+        });
+      }
+    }
+  };
+  var observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
 });
 
 function resetCount() {
@@ -1155,11 +1174,11 @@ function resetCount() {
     var a;
     if (a = chain_cache[b]) return a; {
       let c;
-      if ((c = name_set[b]) && c.length && (a = construct_chain(c))) return chain_cache[b] = a
+      if ((c = name_set[b]) && c.length && (a = varruct_chain(c))) return chain_cache[b] = a
     }
     return !1
   }
-  function construct_chain(b) {
+  function varruct_chain(b) {
     let a = {},
       c;
     for (c = 0; c < b.length; c++) {
@@ -1880,7 +1899,7 @@ function resetCount() {
   var dataSize = table.getElementsByClassName('dataKind')[0].title;
   var strStat = table.getElementsByClassName('dataSTR')[0].innerText;
   var dexStat = table.getElementsByClassName('dataDEX')[0].innerText;
-  var conStat = table.getElementsByClassName('dataCON')[0].innerText;
+  var varat = table.getElementsByClassName('dataCON')[0].innerText;
   var intStat = table.getElementsByClassName('dataINT')[0].innerText;
   var wisStat = table.getElementsByClassName('dataWIS')[0].innerText;
   var chaStat = table.getElementsByClassName('dataCHA')[0].innerText;
@@ -1908,7 +1927,7 @@ function resetCount() {
 `Name: ${dataName} Level: ${dataLevel} (Tier: ${dataTier})
 ${dataSize} sized ${dataKind} ${dataType}
 [Gold: ${dataGold} GP Health: ${dataHP} HP]
-STR ${signAdd(strStat)}${strStat} DEX ${signAdd(dexStat)}${dexStat} CON ${signAdd(conStat)}${conStat} INT ${signAdd(intStat)}${intStat} WIS ${signAdd(wisStat)}${wisStat} CHA ${signAdd(chaStat)}${chaStat}
+STR ${signAdd(strStat)}${strStat} DEX ${signAdd(dexStat)}${dexStat} CON ${signAdd(varat)}${varat} INT ${signAdd(intStat)}${intStat} WIS ${signAdd(wisStat)}${wisStat} CHA ${signAdd(chaStat)}${chaStat}
 BAS +${data1d4} STA +${data1d6} ENH +${data1d8} ADV +${data1d10} ULT +${data1d12} DEF ${signAdd(defStat)}${defStat}
 Description: ${dataDesc}
 Profession: ${dataPro} (${dataProDesc}) 
@@ -1919,25 +1938,6 @@ Abilities: ${ability}Gear: ${charGear}`;
   }
   function parseAbilities(str) {
     return result;
-  }
-  function importNPC() {
-    var importNPC = document.getElementById('exportNPC').value !== '' ? JSON.parse(document.getElementById('exportNPC').value) : false;
-    if (!importNPC) {
-      return false;
-    }
-    if (/^<table/i.test(importNPC)) {
-      var parser = new DOMParser();
-      var parsedHTML = parser.parseFromString(importNPC, 'text/html');
-      var newTable = parsedHTML.querySelector('table');
-      if (newTable) {
-        var containerDiv = document.getElementById('NPCgenerated');
-        if (containerDiv) {
-          containerDiv.appendChild(newTable);
-        } else {
-          console.error(`Parent div 'NPCgenerated' not found`);
-        }
-      }
-    }
   }
   function twoDice(button) {
     var textarea = button.nextElementSibling;
@@ -2052,8 +2052,19 @@ Abilities: ${ability}Gear: ${charGear}`;
   }
   function saveTxt(button) {
     var textContent = button.previousElementSibling.value;
-    console.log(textContent);
-    var fileName = document.getElementById("NPCname").value === '' ? dataName = 'Unnamed' + setDays() : dataName = document.getElementById("NPCname").value + setDays();
+    // Use DOMParser to parse the HTML string
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(textContent, 'text/html');
+    // Find the element with the data-name attribute
+    var element = doc.querySelector('[data-name]');
+    var fileName;
+    if (element) {
+        var dataNameValue = element.getAttribute('data-name');
+        dataNameValue = dataNameValue.replace(/\\\"/g, '');
+        fileName = dataNameValue + setDays();
+    } else {
+        fileName = 'Unnamed' + setDays();
+    }
     var textBlob = new Blob([textContent], { type: "text/plain" });
     saveAs(textBlob, `${fileName}.txt`);
   }
@@ -2589,17 +2600,7 @@ Abilities: ${ability}Gear: ${charGear}`;
     var longago = `Long ago they were ${thepast} before they were ${getOutput(characterDetails.misfortune)} which brought them to the ${getOutput(characterDetails.owner)} who they now owe.`;
     return longago;
   }
-  function createTable(tableElement) {
-    var parser = new DOMParser();
-    var parsedHTML = parser.parseFromString(tableElement, 'text/html');
-    var newTable = parsedHTML.querySelector('table');
-    var containerDiv = document.getElementById('NPCgenerated');
-    if (containerDiv) {
-      containerDiv.appendChild(newTable);
-    } else {
-      console.error("Parent div 'NPCgenerated' not found in the document");
-    }
-  }
+  
   function generateTable(name, charLevel, charType, charGold, charProdesc, charPro, charTier, charKinddesc, charKind, stats, bestStats, effort, charDEF, dataRoll, dataCount, charDesc, abilities, equipment, health) {
     var stats = stats ? stats : { 'STR': 0, 'DEX': 0, 'CON': 0, 'INT': 0, 'WIS': 0, 'CHA': 0, 'HP': 1 }
     var effort = effort ? effort : [0, 0, 0, 0, 0];
@@ -2684,7 +2685,16 @@ Abilities: ${ability}Gear: ${charGear}`;
       </tr>
     </tbody>
    </table>`;
-    createTable(tableElement);
+    var parser = new DOMParser();
+    var parsedHTML = parser.parseFromString(tableElement, 'text/html');
+    var newTable = parsedHTML.querySelector('table');
+    var containerDiv = document.getElementById('NPCgenerated');
+    if (containerDiv) {
+        containerDiv.appendChild(newTable);
+        setupEventListeners(newTable);
+    } else {
+        console.error(`Parent div 'NPCgenerated' not found`);
+    }
     var readMoreTargets = document.querySelectorAll('.dataDesc');
     setDiceRolls(readMoreTargets);
     var timeoutId;
@@ -2739,6 +2749,129 @@ Abilities: ${ability}Gear: ${charGear}`;
       }
     });
   }
+  function setupEventListeners(tableElement) {
+    var readMoreTargets = tableElement.querySelectorAll('.dataDesc');
+    setDiceRolls(readMoreTargets);
+
+    var timeoutId;
+    readMoreTargets.forEach(element => {
+        element.addEventListener('input', function () {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(function () {
+                setDiceRolls(readMoreTargets);
+            }, 2500);
+        });
+    });
+
+    var inventoryDiv = tableElement.querySelectorAll('.inventory');
+    inventoryDiv.forEach(element => {
+        setupInventoryEventListeners(element);
+    });
+
+    var abilitiesDiv = tableElement.querySelectorAll('.abilities');
+    abilitiesDiv.forEach(element => {
+        setupInventoryEventListeners(element);
+    });
+  }
+  function setupInventoryEventListeners(element) {
+    var timeoutId;
+    element.addEventListener('input', function (event) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            // Get the current content
+            var content = this.innerHTML;
+
+            // Strip all existing spans, including attributes and event handlers
+            content = content.replace(/<span[^>]*>|<\/span>/g, '');
+            content = content.replace(/<div[^>]*>|<\/div>/g, '');
+
+
+            // Split lines based on <br> and create a list of words
+            var words = content.split('<br>').filter(word => word.trim() !== '');
+
+            // Wrap each word in a new span
+            var wrappedLines = words.map(word => `<span class="inventory-item">${word}</span>`);
+
+            // Update the content with the wrapped lines
+            this.innerHTML = wrappedLines.join('<br>');
+
+            // Re-establish event listeners for the new spans
+            for (var i = 0; i < this.childNodes.length; i++) {
+                var childNode = this.childNodes[i];
+                if (childNode.nodeType === Node.ELEMENT_NODE && childNode.tagName === 'SPAN') {
+                    childNode.addEventListener('dblclick', function (event) {
+                        var itemText = this.textContent.replace(/\([^()]*\)/g, '').trim();
+                        populateList(itemText);
+                    });
+                }
+            }
+        }, 1000); // Adjust the delay (in milliseconds) based on your preference
+    });
+    element.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            // Prevent the default behavior of Enter key
+            event.preventDefault();
+
+            // Insert a new line without a span tag
+            var range = document.createRange();
+            var selection = window.getSelection();
+            var br = document.createElement('br');
+            range.setStart(selection.anchorNode, selection.anchorOffset);
+            range.collapse(true);
+            range.insertNode(br);
+            range.setStartAfter(br);
+            range.setEndAfter(br);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    });
+    element.addEventListener('keyup', function (event) {
+        // Check if the cursor is at the beginning of the div
+        if (window.getSelection().getRangeAt(0).startOffset === 0) {
+            // Insert an empty span to maintain the structure
+            var range = document.createRange();
+            var selection = window.getSelection();
+            var emptySpan = document.createElement('span');
+            emptySpan.classList.add('inventory-item');
+            range.setStart(selection.anchorNode, selection.anchorOffset);
+            range.collapse(true);
+            range.insertNode(emptySpan);
+            range.setStartAfter(emptySpan);
+            range.setEndAfter(emptySpan);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    });
+    for (var i = 0; i < element.childNodes.length; i++) {
+        var childNode = element.childNodes[i];
+        if (childNode.nodeType === Node.ELEMENT_NODE && childNode.tagName === 'SPAN') {
+            childNode.addEventListener('dblclick', function (event) {
+                var itemText = this.textContent.replace(/\([^()]*\)/g, '').trim();
+                populateList(itemText);
+            });
+        }
+    }
+  }
+  function importNPC() {
+    var importNPC = document.getElementById('exportNPC').value !== '' ? JSON.parse(document.getElementById('exportNPC').value) : false;
+    if (!importNPC) {
+        return false;
+    }
+    if (/^<table/i.test(importNPC)) {
+        var parser = new DOMParser();
+        var parsedHTML = parser.parseFromString(importNPC, 'text/html');
+        var newTable = parsedHTML.querySelector('table');
+        if (newTable) {
+            var containerDiv = document.getElementById('NPCgenerated');
+            if (containerDiv) {
+                containerDiv.appendChild(newTable);
+                setupEventListeners(newTable); // Set up event listeners for the imported table
+            } else {
+                console.error(`Parent div 'NPCgenerated' not found`);
+            }
+        }
+    }
+  }
   var keywordMapping = {
     bipedal: lootSets.anyBipedal,
     aarakocra: [lootSets.anyBipedal, lootSets.animalfolk],
@@ -2758,7 +2891,7 @@ Abilities: ${ability}Gear: ${charGear}`;
     centaur: [lootSets.anyBipedal, lootSets.animalfolk],
     cleric: [lootSets.anyBipedal, lootSets.cleric, lootSets.magical],
     commoner: [lootSets.anyBipedal, lootSets.commoner],
-    construct: [lootSets.artificer, lootSets.construct, lootSets.magical],
+    varruct: [lootSets.artificer, lootSets.varruct, lootSets.magical],
     celestial: [lootSets.celestial, lootSets.magical],
     cultist: [lootSets.anyBipedal, lootSets.cultist, lootSets.magical],
     demon: [lootSets.demon, lootSets.underLoot, lootSets.belowLoot, lootSets.magical],
@@ -2951,9 +3084,9 @@ Abilities: ${ability}Gear: ${charGear}`;
     var inventDesc = jsonData.inv.split(", ");
     var additionalGear = processInv(kind);
     additionalGear ? inventDesc.push(additionalGear) : '';
-    inventDesc.push(`<span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(npcGear); return false;" title="Adventuring Gear">${getOutput(npcGear)}</span>`);
-    inventDesc.push(`<span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">${getOutput(dndItems.adventuringGear)}</span>`);
-    inventDesc.push(`<span style="color:red;" oncontextmenu="this.innerHTML = getOutput(dndItems).split(': ')[1]; this.title = 'item'; return false;" title="${extraItem[0]}">${extraItem[1]}</span>`);
+    inventDesc.push(`<span class="orange" oncontextmenu="this.innerHTML = getOutput(npcGear); return false;" title="Adventuring Gear">${getOutput(npcGear)}</span>`);
+    inventDesc.push(`<span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">${getOutput(dndItems.adventuringGear)}</span>`);
+    inventDesc.push(`<span class="red" oncontextmenu="this.innerHTML = getOutput(dndItems).split(': ')[1]; this.title = 'item'; return false;" title="${extraItem[0]}">${extraItem[1]}</span>`);
     var inventory = inventDesc.join('<br>');
     var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
     var hitPoints = jsonData.hp;
@@ -3092,7 +3225,7 @@ Abilities: ${ability}Gear: ${charGear}`;
   function shuffleArray(array) {
     // Fisher-Yates shuffle algorithm to shuffle an array
     for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      var j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
   }
@@ -3268,7 +3401,7 @@ Abilities: ${ability}Gear: ${charGear}`;
       case 'Animated Object':
       case 'Awakened Animal':
       case 'Awakened Plant':
-      case 'Construct':
+      case 'varruct':
       case 'Faefolk':
       case 'Monsterfolk':
       case 'Ooze':
@@ -3507,34 +3640,34 @@ Abilities: ${ability}Gear: ${charGear}`;
     return max;
   }
   function getEquipment(type) {
-    var wizardFamiliar = Math.random() < 0.5 ? '<br><span style="color:orange;" oncontextmenu="this.innerHTML = findFamiliar(); return false;" title="Familiar">' + findFamiliar() + '</span><span> familiar</span>' : '';
-    var artificerGadget = '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">' + getOutput(characterOptions.artificerInfusion) + '</span>';
-    var rangerCompanion = '<span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic); return false;" title="Beast Buddy">' + getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic) + '</span> Companion';
-    var spyKit = '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.tools); return false;" title="Toolset">' + getOutput(dndItems.tools) + '</span>';
+    var wizardFamiliar = Math.random() < 0.5 ? '<br><span class="orange" oncontextmenu="this.innerHTML = findFamiliar(); return false;" title="Familiar">' + findFamiliar() + '</span><span> familiar</span>' : '';
+    var artificerGadget = '<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">' + getOutput(characterOptions.artificerInfusion) + '</span>';
+    var rangerCompanion = '<span class="orange" oncontextmenu="this.innerHTML = getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic); return false;" title="Beast Buddy">' + getOutput(Math.random() < 0.75 ? enemies.beastMedium : Math.random() < 0.75 ? enemies.beastSmall : enemies.beastMagic) + '</span> Companion';
+    var spyKit = '<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.tools); return false;" title="Toolset">' + getOutput(dndItems.tools) + '</span>';
     var toolSets = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools);
     var startingPacks = [
-      'backpack (stow below)<br>sack(1)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>lantern<br>oil (flask) (2)<br>tinderbox<br>piton (12)<br>hammer<br>waterskin (4 Glugs)<br>Ration(4)<br>5 GP',
-      'backpack (stow below)<br>sack(2)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>torch(10)<br>oil (flask)(3)<br>tinderbox<br>10’ pole<br>rope (50’)<br>waterskin (4 Glugs)<br>Ration(10)<br>steel mirror',
-      'backpack (stow below)<br>sack(4)<br><span style="color:blue;" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>piton(12)<br>rope (50’)<br>waterskin (4 Glugs)<br>Ration(10)'];
+      'backpack (stow below)<br>sack(1)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>lantern<br>oil (flask) (2)<br>tinderbox<br>piton (12)<br>hammer<br>waterskin (4 Glugs)<br>Ration(4)<br>5 GP',
+      'backpack (stow below)<br>sack(2)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>torch(10)<br>oil (flask)(3)<br>tinderbox<br>Pole(10’)<br>rope(50’)<br>waterskin (4 Glugs)<br>Ration(10)<br>steel mirror',
+      'backpack (stow below)<br>sack(4)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>piton(12)<br>rope (50’)<br>waterskin (4 Glugs)<br>Ration(10)'];
     var gameClassEquipment = {
-      'monk': 'shortsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dart(10)<br>prayer beads',
-      'barbarian': 'greataxe<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>handaxe(2)<br>javelin(4)<br>totem',
-      'warrior': 'longsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>chain mail',
-      'thief': 'shortsword<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger(2)' + spyKit + '<br>grappling hook<br>thieves’ tools<br>leather armor',
+      'monk': 'shortsword<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dart(10)<br>prayer beads',
+      'barbarian': 'greataxe<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>handaxe(2)<br>javelin(4)<br>totem',
+      'warrior': 'longsword<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>chain mail',
+      'thief': 'shortsword<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger(2)' + spyKit + '<br>grappling hook<br>thieves’ tools<br>leather armor',
       'assassin': 'dagger(2)<br>dart(10)<br>basic poison' + spyKit + '<br>leather armor<br>thieves’ tools',
       'spy': 'dagger<br>hand crossbow<br>bolt(10)<br>spyglass' + spyKit + '<br>forged papers',
-      'cleric': 'mace<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>scale mail',
-      'druid': 'wooden staff<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br>wooden shield<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
-      'paladin': 'greatsword<br>shortsword<br>javelin(5)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>chain mail',
-      'sorcerer': 'dagger(2)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span>',
-      'warlock': 'dagger(2)<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
+      'cleric': 'mace<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.martialMelee); return false;" title="Martial Melee">' + getOutput(dndItems.martialMelee) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>scale mail',
+      'druid': 'wooden staff<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br>wooden shield<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
+      'paladin': 'greatsword<br>shortsword<br>javelin(5)<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.shield); return false;" title="Shield">' + getOutput(dndItems.shield) + '</span><br>holy symbol<br>chain mail',
+      'sorcerer': 'dagger(2)<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span>',
+      'warlock': 'dagger(2)<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.spellcastingFocus); return false;" title="Focus">' + getOutput(dndItems.spellcastingFocus) + '</span><br>leather armor',
       'wizard': 'dagger<br>component pouch' + wizardFamiliar + '<br>spellbook',
-      'artificer': 'dagger<br><span style="color:orange;" oncontextmenu="this.innerHTML = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools); return false;" title="Toolset">' + toolSets + '</span>' + artificerGadget + '<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>studded leather armor',
+      'artificer': 'dagger<br><span class="orange" oncontextmenu="this.innerHTML = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools); return false;" title="Toolset">' + toolSets + '</span>' + artificerGadget + '<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>studded leather armor',
       'ranger': 'longbow<br>arrows(20)<br>dagger<br>' + rangerCompanion,
-      'bard': 'rapier<br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(genericItem.Instrument); return false;"title="Instrument">' + getOutput(genericItem.Instrument) + '</span><br><span style="color:orange;" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger'
+      'bard': 'rapier<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(genericItem.Instrument); return false;"title="Instrument">' + getOutput(genericItem.Instrument) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dagger'
     }
     var extraItem = getOutput(dndItems).split(': ');
-    return gameClassEquipment[type] + '<br>' + getOutput(startingPacks) + `<br><span style="color:red;" title="${extraItem[0]}">${extraItem[1]}</span>`;
+    return gameClassEquipment[type] + '<br>' + getOutput(startingPacks) + `<br><span class="red" title="${extraItem[0]}">${extraItem[1]}</span>`;
   }
   function getAbilities(type, stats, max, statTotal, effortTotal){
     var subClass = [];
@@ -3616,7 +3749,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['PsiOrderOptions']);
         subClass.push(subClassList['SoulKnifeOrder']);
         subClassChoice = getOutput(subClass);
-        var doubleProficiency = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
+        var doubleProficiency = `<span class="blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
         secretLanguages = '(Secret Language) Thieves’ Cant<br>';
         charAbilities = ['Pool of Bits', 'Opportunity Attacks'];
         break;
@@ -3637,7 +3770,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['PsiOrderOptions']);
         subClass.push(subClassList['SoulKnifeOrder']);
         subClassChoice = getOutput(subClass);
-        var doubleProficiency = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
+        var doubleProficiency = `<span class="blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
         charAbilities = ['Pool of Bits', 'Assassinate'];
         break;
       case 'spy':
@@ -3654,7 +3787,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['PsiOrderOptions']);
         subClass.push(subClassList['SoulKnifeOrder']);
         subClassChoice = getOutput(subClass);
-        var doubleProficiency = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
+        var doubleProficiency = `<span class="blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">${getOutput(proficiency)}</span>`;
         charAbilities = ['Pool of Bits', 'Cunning Action'];
         break;
       case 'cleric':
@@ -3681,9 +3814,9 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['ZealDomain']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Channel Divinity'];
         break;
       case 'druid':
@@ -3706,9 +3839,9 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['WildfireCircle']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Wild Shape'];
         break;
       case 'paladin':
@@ -3724,8 +3857,8 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['WatchersOath']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${getOutput(magicDiscipline)}<br>`
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Opportunity Attacks'];
         break;
       case 'sorcerer':
@@ -3750,9 +3883,9 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['WiltBlossomMage']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Font of Magic'];
         break;
       case 'warlock':
@@ -3777,10 +3910,10 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['UndyingPact']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
-        var eldritchInvocation = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(characterOptions.eldritchInvocation); return false;" title="Invocation">${getOutput(characterOptions.eldritchInvocation)} (Invocation)</span>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        var eldritchInvocation = `<span class="blue" oncontextmenu="this.innerHTML = getOutput(characterOptions.eldritchInvocation); return false;" title="Invocation">${getOutput(characterOptions.eldritchInvocation)} (Invocation)</span>`;
         charAbilities = ['Pact Magic', eldritchInvocation];
         break;
       case 'wizard':
@@ -3805,9 +3938,9 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['WiltBlossomMage']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Full Caster'];
         break;
       case 'artificer':
@@ -3825,10 +3958,10 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['WiltBlossomMage']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
-        var infusionAbility = `<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">${getOutput(characterOptions.artificerInfusion)} (Infusion)</span>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        var infusionAbility = `<span class="blue" oncontextmenu="this.innerHTML = getOutput(characterOptions.artificerInfusion); return false;" title="Infusion">${getOutput(characterOptions.artificerInfusion)} (Infusion)</span>`;
         charAbilities = [infusionAbility];
         break;
       case 'ranger':
@@ -3850,8 +3983,8 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['ScoutStyle']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${getOutput(magicDiscipline)}<br>`
-        charSnapSpell = `(Snap Spell) hunter’s mark, <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span>, <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) hunter’s mark, <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span>, <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Call Companion'];
         break;
       case 'bard':
@@ -3872,9 +4005,9 @@ Abilities: ${ability}Gear: ${charGear}`;
         subClass.push(subClassList['WiltBlossomMage']);
         subClassChoice = getOutput(subClass);
         charMagicDiscipline = `(Magic Disciplines) ${magicDisc.join(', ')}<br>`;
-        charSnapSpell = `(Snap Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
-        charKnownSpell = `(Known Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
-        charPrepSpell = `(Prepared Spell) <span style="color:blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
+        charSnapSpell = `(Snap Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Snap Spell">${getOutput(dndspells.cantrip)}</span><br>`;
+        charKnownSpell = `(Known Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Known Spell">${getOutput(dndspells.first)}</span><br>`;
+        charPrepSpell = `(Prepared Spell) <span class="blue" oncontextmenu="this.innerHTML = getOutput(dndspells.cantrip); return false;" title="Prepared Spell">${getOutput(dndspells.first)}</span><br>`;
         charAbilities = ['Inspiration'];
         break;
     }
@@ -3887,7 +4020,7 @@ Abilities: ${ability}Gear: ${charGear}`;
     var skilled = getRandomInt(stats['INT']);
     skilled ? skillList += '(Proficiency) ' : '';
     for (var i = 0; i < skilled; i++) {
-      skillList += '<span style="color:blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">' + getOutput(proficiency) + '</span>';
+      skillList += '<span class="blue" oncontextmenu="this.innerHTML = getOutput(proficiency); return false;" title="Proficiency">' + getOutput(proficiency) + '</span>';
       if (i != skilled - 1 && skilled > 1) {
         skillList += ', ';
       }
