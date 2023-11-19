@@ -1295,8 +1295,6 @@ function resetCount() {
     var elem = table.parentNode.parentNode.parentNode.parentNode;
     var u_id = elem.getAttribute('table-id');
     var clone = elem.cloneNode(true);
-
-    // Generate a new consistent ID based on the displayed name
     var oldTableName = elem.querySelector('.dataName').innerHTML;
     var newTableName = `${oldTableName}-${tokenCounter}`;
     var newTokenID = `${newTableName}-${tokenCounter}`;
@@ -1842,8 +1840,20 @@ function resetCount() {
     document.getElementById('rollTime').innerHTML = '(' + time + ')';
   }
   function addtoTurnOrder(name) {
-    var insert = getRandomIntMaxMin(20) + ' ' + name;
-    document.getElementById("turnOrder").value += insert + '\n';
+    var turnOrderElement = document.getElementById("turnOrder");
+    var init = turnOrderElement.innerHTML.trim();
+    var coin = getRandomIntMaxMin(2);
+    var insert;
+    name === 'enemy' ? insert = coin === 2 ? '1' + ' ' + name : '21' + ' ' + name : insert = getRandomIntMaxMin(20) + ' ' + name;
+    if (init === 'Turn Order') {
+        turnOrderElement.innerHTML = insert;
+    } else {
+        turnOrderElement.innerHTML += ', ' + insert;
+    }
+    var elements = turnOrderElement.innerHTML.split(", ");
+    elements.sort((a, b) => sortByDataString(a, b));
+    var voidnoid;
+    turnOrderElement.innerHTML = elements.filter((el) => el !== '').join(', ');
   }
   function encumbranceCheck(cell) {
     var items = cell.childNodes[3].getElementsByTagName("br").length;
@@ -1870,9 +1880,11 @@ function resetCount() {
     }
   }
   function getVocation(job) {
-    var work = getOutput(vocations);
-    job.innerHTML = work.split(' | ')[0];
-    job.title = work.split(' | ')[1];
+    var profession = getOutput(vocations).split(' | ');
+    var professionDetail = profession[0].split(': ');
+    var professionDesc = professionDetail[0] + ': ' + profession[1];
+    job.innerHTML = professionDetail[1];
+    job.title = professionDesc;
   }
   function findDiscipline() {
     var discipline = getOutput(magicDisciplineLevel) + ' ' + getOutput(magicDiscipline);
@@ -1885,45 +1897,45 @@ function resetCount() {
   function exportNPC(Character) {
     var table = document.querySelector(`table[table-id="${Character}"]`);
     var tableHTML = table.outerHTML;
-  document.getElementById('exportNPC').value = JSON.stringify(tableHTML);
-  var dataName;
-  table.getElementsByClassName('dataName')[0].innerText === '' ? dataName = 'Unnamed' : dataName = table.getElementsByClassName('dataName')[0].innerText;
-  var dataLevel = table.getElementsByClassName('dataLevel')[0].innerText;
-  var dataType = table.getElementsByClassName('dataType')[0].innerText;
-  var dataGold = table.getElementsByClassName('dataGold')[0].innerText.replace(/\D/g, '');;
-  var dataPro = table.getElementsByClassName('dataPro')[0].innerText;
-  var dataProDesc = table.getElementsByClassName('dataPro')[0].title;
-  var dataHP = table.getElementsByClassName('dataHP')[0].innerText;
-  var dataTier = table.getElementsByClassName('dataTier')[0].innerText;
-  var dataKind = table.getElementsByClassName('dataKind')[0].innerText;
-  var dataSize = table.getElementsByClassName('dataKind')[0].title;
-  var strStat = table.getElementsByClassName('dataSTR')[0].innerText;
-  var dexStat = table.getElementsByClassName('dataDEX')[0].innerText;
-  var varat = table.getElementsByClassName('dataCON')[0].innerText;
-  var intStat = table.getElementsByClassName('dataINT')[0].innerText;
-  var wisStat = table.getElementsByClassName('dataWIS')[0].innerText;
-  var chaStat = table.getElementsByClassName('dataCHA')[0].innerText;
-  var bestStats = table.getElementsByClassName('dataBest')[0].innerText;
-  var data1d4 = table.getElementsByClassName('data1d4')[0].innerText;
-  var data1d6 = table.getElementsByClassName('data1d6')[0].innerText;
-  var data1d8 = table.getElementsByClassName('data1d8')[0].innerText;
-  var data1d10 = table.getElementsByClassName('data1d10')[0].innerText;
-  var data1d12 = table.getElementsByClassName('data1d12')[0].innerText;
-  var defStat = table.getElementsByClassName('dataDEF')[0].innerText;
-  var dataRoll = table.getElementsByClassName('dataRoll')[0].innerText;
-  var dataCount = table.getElementsByClassName('dataCount')[0].innerText;
-  var dataDesc = table.getElementsByClassName('dataDesc')[0].innerText;
-  var abilities = table.getElementsByClassName('abilities')[0].innerText.split('\n');
-  var inventory = table.getElementsByClassName('inventory')[0].innerText.split('\n');
-  var ability = '';
-  var charGear = '';
-  for (let item in abilities) {
-    ability += abilities[item] + `\n`;
-  }
-  for (let item in inventory) {
-    charGear += inventory[item] + `\n`;
-  }
-  document.getElementById('CharacterTxt').value =
+    document.getElementById('exportNPC').value = JSON.stringify(tableHTML);
+    var dataName;
+    table.getElementsByClassName('dataName')[0].innerText === '' ? dataName = 'Unnamed' : dataName = table.getElementsByClassName('dataName')[0].innerText;
+    var dataLevel = table.getElementsByClassName('dataLevel')[0].innerText;
+    var dataType = table.getElementsByClassName('dataType')[0].innerText;
+    var dataGold = table.getElementsByClassName('dataGold')[0].innerText.replace(/\D/g, '');;
+    var dataPro = table.getElementsByClassName('dataPro')[0].innerText;
+    var dataProDesc = table.getElementsByClassName('dataPro')[0].title;
+    var dataHP = table.getElementsByClassName('dataHP')[0].innerText;
+    var dataTier = table.getElementsByClassName('dataTier')[0].innerText;
+    var dataKind = table.getElementsByClassName('dataKind')[0].innerText;
+    var dataSize = table.getElementsByClassName('dataKind')[0].title;
+    var strStat = table.getElementsByClassName('dataSTR')[0].innerText;
+    var dexStat = table.getElementsByClassName('dataDEX')[0].innerText;
+    var varat = table.getElementsByClassName('dataCON')[0].innerText;
+    var intStat = table.getElementsByClassName('dataINT')[0].innerText;
+    var wisStat = table.getElementsByClassName('dataWIS')[0].innerText;
+    var chaStat = table.getElementsByClassName('dataCHA')[0].innerText;
+    var bestStats = table.getElementsByClassName('dataBest')[0].innerText;
+    var data1d4 = table.getElementsByClassName('data1d4')[0].innerText;
+    var data1d6 = table.getElementsByClassName('data1d6')[0].innerText;
+    var data1d8 = table.getElementsByClassName('data1d8')[0].innerText;
+    var data1d10 = table.getElementsByClassName('data1d10')[0].innerText;
+    var data1d12 = table.getElementsByClassName('data1d12')[0].innerText;
+    var defStat = table.getElementsByClassName('dataDEF')[0].innerText;
+    var dataRoll = table.getElementsByClassName('dataRoll')[0].innerText;
+    var dataCount = table.getElementsByClassName('dataCount')[0].innerText;
+    var dataDesc = table.getElementsByClassName('dataDesc')[0].innerText;
+    var abilities = table.getElementsByClassName('abilities')[0].innerText.split('\n');
+    var inventory = table.getElementsByClassName('inventory')[0].innerText.split('\n');
+    var ability = '';
+    var charGear = '';
+    for (let item in abilities) {
+      ability += abilities[item] + `\n`;
+    }
+    for (let item in inventory) {
+      charGear += inventory[item] + `\n`;
+    }
+    document.getElementById('CharacterTxt').value =
 `Name: ${dataName} Level: ${dataLevel} (Tier: ${dataTier})
 ${dataSize} sized ${dataKind} ${dataType}
 [Gold: ${dataGold} GP Health: ${dataHP} HP]
@@ -1940,8 +1952,8 @@ Abilities: ${ability}Gear: ${charGear}`;
     return result;
   }
   function twoDice(button) {
-    var textarea = button.nextElementSibling;
-    var text = textarea.value;
+    var str = document.getElementById("randomTable");
+    var text = str.value;
     var lines = text.split('\n');
     lines = lines.length % 2 === 0 ? lines : lines.concat(lines[0]);
     var numSides = Math.ceil(lines.length / 2);
@@ -1955,12 +1967,12 @@ Abilities: ${ability}Gear: ${charGear}`;
     var startIndex = lines.slice(0, randomIndex).reduce((acc, line) => acc + line.length + 1, 0);
     var startWordIndex = exactLine.indexOf(startingWord);
     var endIndex = startIndex + exactLine.length;
-    textarea.focus();
-    textarea.setSelectionRange(startIndex + startWordIndex, startIndex + startWordIndex + startingWord.length);
+    str.focus();
+    str.setSelectionRange(startIndex + startWordIndex, endIndex);
   }
-  function handoffate(button) {
-    var textarea = button.previousElementSibling;
-    var text = textarea.value;
+  function oneofMany() {
+    var str = document.getElementById("randomTable");
+    var text = str.value;
     var lines = text.split('\n');
     var randomIndex = Math.floor(Math.random() * lines.length);
     var randomLine = lines[randomIndex];
@@ -1970,8 +1982,40 @@ Abilities: ${ability}Gear: ${charGear}`;
     var startIndex = lines.slice(0, randomIndex).reduce((acc, line) => acc + line.length + 1, 0);
     var startWordIndex = exactLine.indexOf(startingWord);
     var endIndex = startIndex + exactLine.length;
-    textarea.focus();
-    textarea.setSelectionRange(startIndex + startWordIndex, startIndex + startWordIndex + startingWord.length);
+    str.focus();
+    str.setSelectionRange(startIndex + startWordIndex, endIndex);
+  }
+  function orderofTurn() {
+    var str = document.getElementById("randomTable").value;
+    var n = str.split("\n");
+    var elements = [];
+    for (let i in n) {
+      elements.push(n[i]);
+    }
+    var arr = elements.sort((a, b) => sortByDataNumber(a, b));
+    var voidnoid;
+    document.getElementById("randomTable").value = '';
+    for (let y in arr) {
+      arr[y] === '' ? voidnoid = '' : document.getElementById("randomTable").value = document.getElementById("randomTable").value + arr[y] + "\n";
+    }
+  }
+  function handoffate() {
+    var turnOrderElement = document.getElementById("turnOrder");
+    var nestedSpan = turnOrderElement.querySelector('span');
+    if (nestedSpan) {
+        var textNode = document.createTextNode(nestedSpan.innerText);
+        nestedSpan.parentNode.replaceChild(textNode, nestedSpan);
+    }
+    var init = turnOrderElement.innerHTML.trim();
+    var lines = init.split(', ');
+    var randomIndex = Math.floor(Math.random() * lines.length);
+    var randomLine = lines[randomIndex];
+    var startingWord = randomLine.trim().split(' ')[1];
+    var matchingLines = lines.filter(line => line.trim().includes(startingWord));
+    var exactLine = matchingLines[randomIndex % matchingLines.length];
+    var highlightedText = exactLine.replace(startingWord, '<span class="highlight">' + startingWord + '</span>');
+    lines[randomIndex % matchingLines.length] = highlightedText;
+    turnOrderElement.innerHTML = lines.join(', ');
   }
   function CountDownTimer(duration, granularity) {
     this.duration = duration;
@@ -2052,10 +2096,8 @@ Abilities: ${ability}Gear: ${charGear}`;
   }
   function saveTxt(button) {
     var textContent = button.previousElementSibling.value;
-    // Use DOMParser to parse the HTML string
     var parser = new DOMParser();
     var doc = parser.parseFromString(textContent, 'text/html');
-    // Find the element with the data-name attribute
     var element = doc.querySelector('[data-name]');
     var fileName;
     if (element) {
@@ -2389,7 +2431,6 @@ Abilities: ${ability}Gear: ${charGear}`;
     return outputString;
   }
   function findMatchingElements(arr1, arr2) {
-    //array matching
     return arr1.filter((element) => arr2.includes(element));
   }
   function squareDetails(color) {
@@ -2600,7 +2641,6 @@ Abilities: ${ability}Gear: ${charGear}`;
     var longago = `Long ago they were ${thepast} before they were ${getOutput(characterDetails.misfortune)} which brought them to the ${getOutput(characterDetails.owner)} who they now owe.`;
     return longago;
   }
-  
   function generateTable(name, charLevel, charType, charGold, charProdesc, charPro, charTier, charKinddesc, charKind, stats, bestStats, effort, charDEF, dataRoll, dataCount, charDesc, abilities, equipment, health) {
     var stats = stats ? stats : { 'STR': 0, 'DEX': 0, 'CON': 0, 'INT': 0, 'WIS': 0, 'CHA': 0, 'HP': 1 }
     var effort = effort ? effort : [0, 0, 0, 0, 0];
@@ -2614,7 +2654,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         </th>
         <th class="dataLevel" colspan="1" onclick="if(shiftKeyPress){this.innerHTML = +this.innerHTML+10}else{this.innerHTML = +this.innerHTML+1} return false;" oncontextmenu="if(shiftKeyPress){this.innerHTML = +this.innerHTML-10}else{this.innerHTML = +this.innerHTML-1} return false" title="Level">${charLevel}</th>
         <th colspan="1" contenteditable="true"><span class="dataType" oncontextmenu="this.innerHTML = Object.keys(gameClass)[getRandomIntMaxMin(Object.keys(gameClass).length-1)]; return false;" title="Type">${charType}</span></th>
-        <th class="dataGold" colspan="1" contenteditable="true" title="Wealth">${charGold}</th>
+        <th class="dataGold" colspan="1" contenteditable="true" title="Wealth" onclick="var numVal = parseInt(this.innerText); if(shiftKeyPress){this.innerHTML = +numVal+10 + ' GP'}else{this.innerHTML = +numVal+1 + ' GP'} return false;" oncontextmenu="var numVal = parseInt(this.innerText); if(shiftKeyPress){this.innerHTML = +numVal-10 + ' GP'}else{this.innerHTML = +numVal-1 + ' GP'} return false">${charGold}</th>
         <th class="dataHP" colspan="1" onclick="if(shiftKeyPress){this.innerHTML = +this.innerHTML+10}else{this.innerHTML = +this.innerHTML+1}" oncontextmenu=" if(shiftKeyPress){this.innerHTML = +this.innerHTML-10}else{this.innerHTML = +this.innerHTML-1}" title="Health">${health}</th>
         <th colspan="2" contenteditable="true"><span class="dataPro" oncontextmenu="getVocation(this); return false;" title="${charProdesc}">${charPro}</span></th>
         <th class="dataTier" colspan="1" onclick="if(shiftKeyPress){this.innerHTML = +this.innerHTML+10}else{this.innerHTML = +this.innerHTML+1} return false;" oncontextmenu="if(shiftKeyPress){this.innerHTML = +this.innerHTML-10}else{this.innerHTML = +this.innerHTML-1} return false"  title="Tier">${charTier}</th>
@@ -2644,7 +2684,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         <td style="padding:0 0.5em; white-space: nowrap" colspan="2">
           <img onclick="addMarker('ball1', this.closest('.NPCinfo').getAttribute('table-id'), this.parentNode.parentNode.parentNode.parentNode.children[0].childNodes[1].childNodes[1].innerText, 0)" style="height:1em;  margin:1em 0" src="svg/arrows-down-to-people.svg" title="ADD MARKER"/>
           <img onclick="takeCover(this)" style="height:1em; margin:1em 0" src="svg/circle-half-stroke.svg" title="TAKE COVER"/>
-          <img onclick="addtoTurnOrder(parentNode.parentNode.parentNode.childNodes[1].childNodes[1].childNodes[1].innerHTML)" style="height:1em; margin:1em 0;" src="svg/swords.svg" title="FIGHT"/>
+          <img onclick="addtoTurnOrder(parentNode.parentNode.parentNode.childNodes[1].childNodes[1].childNodes[1].innerHTML)" style="height:1em; margin:1em 0;" src="svg/swords.svg" title="FIGHT">
           <img onclick="generateTable('BOSS', 0, 'BOSS', 0, 'BOSS', 'BOSS', 0, 'BOSS', 'BOSS', { 'STR': 5, 'DEX': 5, 'CON': 5, 'INT': 5, 'WIS': 5, 'CHA': 5 }, '', [5, 5, 5, 5, 5], 5, '', '', '', '', '', 50)" style="height:1em; margin:1em 0;" src="svg/axe-battle.svg" title="BOSS"/>
           <img onclick="generateTable('Object', 0, 'Object', 0, 'Object', 'Object', 0, 'Object', 'Object', 0, '', 0, 0, '', '', '', '', '')" style="height:1em; margin:1em 0;" src="svg/axe.svg" title="OBJECT"/>
           <img onclick="copyNPCTable(this)" style="height:1em; margin:1em 0;" src="svg/people-arrows.svg" title="COPY"/>
@@ -2653,7 +2693,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         <td colspan="6"><h3 class="dataCount" contenteditable="true">${dataCount}</h3></td>
       </tr>
       <tr>
-        <td class="right lightback" colspan="8">
+        <td class="rightalign lightback" colspan="8">
           <img style="float:left; height:1em; margin:1em;" src="svg/arrow-down-short-wide.svg" />
           <p style="float:left; margin-right:20px;" onclick="this.parentNode.parentNode.parentNode.parentNode.tBodies[0].style.display = 'table-row-group'">Click to Open</p>
           <img style="float:right; height:1em; margin:1em;" src="svg/arrow-up-wide-short.svg" />
@@ -2778,24 +2818,12 @@ Abilities: ${ability}Gear: ${charGear}`;
     element.addEventListener('input', function (event) {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-            // Get the current content
             var content = this.innerHTML;
-
-            // Strip all existing spans, including attributes and event handlers
             content = content.replace(/<span[^>]*>|<\/span>/g, '');
             content = content.replace(/<div[^>]*>|<\/div>/g, '');
-
-
-            // Split lines based on <br> and create a list of words
             var words = content.split('<br>').filter(word => word.trim() !== '');
-
-            // Wrap each word in a new span
             var wrappedLines = words.map(word => `<span class="inventory-item">${word}</span>`);
-
-            // Update the content with the wrapped lines
             this.innerHTML = wrappedLines.join('<br>');
-
-            // Re-establish event listeners for the new spans
             for (var i = 0; i < this.childNodes.length; i++) {
                 var childNode = this.childNodes[i];
                 if (childNode.nodeType === Node.ELEMENT_NODE && childNode.tagName === 'SPAN') {
@@ -2805,14 +2833,11 @@ Abilities: ${ability}Gear: ${charGear}`;
                     });
                 }
             }
-        }, 1000); // Adjust the delay (in milliseconds) based on your preference
+        }, 2500);
     });
     element.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
-            // Prevent the default behavior of Enter key
             event.preventDefault();
-
-            // Insert a new line without a span tag
             var range = document.createRange();
             var selection = window.getSelection();
             var br = document.createElement('br');
@@ -2826,9 +2851,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         }
     });
     element.addEventListener('keyup', function (event) {
-        // Check if the cursor is at the beginning of the div
         if (window.getSelection().getRangeAt(0).startOffset === 0) {
-            // Insert an empty span to maintain the structure
             var range = document.createRange();
             var selection = window.getSelection();
             var emptySpan = document.createElement('span');
@@ -2865,7 +2888,7 @@ Abilities: ${ability}Gear: ${charGear}`;
             var containerDiv = document.getElementById('NPCgenerated');
             if (containerDiv) {
                 containerDiv.appendChild(newTable);
-                setupEventListeners(newTable); // Set up event listeners for the imported table
+                setupEventListeners(newTable);
             } else {
                 console.error(`Parent div 'NPCgenerated' not found`);
             }
@@ -3036,6 +3059,8 @@ Abilities: ${ability}Gear: ${charGear}`;
     var kind2 = kind.includes('bipedal') ? kind.replace('bipedal', getOutput(mediumAll)) : kind;
     kind2 = kind2.includes(' ') ? capFirst(kind2) : capCase(kind2);
     var profession = getOutput(vocations).split(' | ');
+    var professionDetail = profession[0].split(': ');
+    var professionDesc = professionDetail[0] + ': ' + profession[1];
     var variableGold = Math.floor(Math.random() * 5) + 1 * Math.random() < 0.75 ? 10 : Math.random() < 0.75 ? 50 : 100;
     var startingGold = getRandomIntMaxMin(variableGold) + ' GP';
     var strSave = jsonData.save.str !== 0 ? 'STR Save: (' + jsonData.save.str + ') ' : '';
@@ -3091,7 +3116,7 @@ Abilities: ${ability}Gear: ${charGear}`;
     var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
     var hitPoints = jsonData.hp;
     hitPoints += Math.ceil(hitPoints *= (plusOrMinus * getRandomPercentage(30)) / 100);
-    generateTable(name.replace('@', ''), jsonData.hit, "NPC", startingGold, profession[1], profession[0], jsonData.tier, kind1, kind2, { 'STR': jsonData.str, 'DEX': jsonData.dex, 'CON': jsonData.con, 'INT': jsonData.int, 'WIS': jsonData.wis, 'CHA': jsonData.cha }, '', [jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit], jsonData.def, "", "Counters", description + ' Regular HP: ' + jsonData.hp, abilities, inventory, hitPoints);
+    generateTable(name.replace('@', ''), jsonData.hit, "NPC", startingGold, professionDesc, professionDetail[1], jsonData.tier, kind1, kind2, { 'STR': jsonData.str, 'DEX': jsonData.dex, 'CON': jsonData.con, 'INT': jsonData.int, 'WIS': jsonData.wis, 'CHA': jsonData.cha }, '', [jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit, jsonData.hit], jsonData.def, "", "Counters", description + ' Regular HP: ' + jsonData.hp, abilities, inventory, hitPoints);
   }
   var gameClass = {
     'monk': 'WIS, DEX',
@@ -3646,9 +3671,9 @@ Abilities: ${ability}Gear: ${charGear}`;
     var spyKit = '<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.tools); return false;" title="Toolset">' + getOutput(dndItems.tools) + '</span>';
     var toolSets = Math.random() < 0.75 ? getOutput(dndItems.tools) : getOutput(dndItems.artisanTools);
     var startingPacks = [
-      'backpack (stow below)<br>sack(1)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>lantern<br>oil (flask) (2)<br>tinderbox<br>piton (12)<br>hammer<br>waterskin (4 Glugs)<br>Ration(4)<br>5 GP',
-      'backpack (stow below)<br>sack(2)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>torch(10)<br>oil (flask)(3)<br>tinderbox<br>Pole(10’)<br>rope(50’)<br>waterskin (4 Glugs)<br>Ration(10)<br>steel mirror',
-      'backpack (stow below)<br>sack(4)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>piton(12)<br>rope (50’)<br>waterskin (4 Glugs)<br>Ration(10)'];
+      'backpack (stow below)<br>sack(1)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>lantern<br>oil (flask) (2)<br>tinderbox<br>piton (12)<br>hammer<br>waterskin (4 Glugs)<br>ration(4)<br>5 GP',
+      'backpack (stow below)<br>sack(2)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>torch(10)<br>oil (flask)(3)<br>tinderbox<br>Pole(10’)<br>rope(50’)<br>waterskin (4 Glugs)<br>ration(10)<br>steel mirror',
+      'backpack (stow below)<br>sack(4)<br><span class="blue" oncontextmenu="this.innerHTML = getOutput(dndItems.adventuringGear); return false;" title="Adventuring Gear">' + getOutput(dndItems.adventuringGear) + '</span><br>piton(12)<br>rope (50’)<br>waterskin (4 Glugs)<br>ration(10)'];
     var gameClassEquipment = {
       'monk': 'shortsword<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleMelee); return false;" title="Simple Melee">' + getOutput(dndItems.simpleMelee) + '</span><br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>dart(10)<br>prayer beads',
       'barbarian': 'greataxe<br><span class="orange" oncontextmenu="this.innerHTML = getOutput(dndItems.simpleRange); return false;" title="Simple Range">' + getOutput(dndItems.simpleRange) + '</span><br>handaxe(2)<br>javelin(4)<br>totem',
@@ -4124,6 +4149,30 @@ ${negativeAbil}`;
     }
     return a.localeCompare(b); // For non-numeric values
   }
+  function sortByDataNumber(a, b) {
+    if (a === null) {
+      return 1;
+    }
+    if (b === null) {
+      return -1;
+    }
+    var numA = parseFloat(a);
+    var numB = parseFloat(b);
+    if (!isNaN(numA) && !isNaN(numB)) {
+      if (numA < numB) return -1;
+      if (numA > numB) return 1;
+      return 0; // Numeric values are equal
+    }
+    if (!isNaN(numA)) {
+      if (numA < 0) return -1; // Treat negative numbers as less
+      return 1;
+    }
+    if (!isNaN(numB)) {
+      if (numB < 0) return 1; // Treat negative numbers as greater
+      return -1;
+    }
+    return a.localeCompare(b); // For non-numeric values
+  }
   function calculateSpell() {
     var disc = Number(document.getElementById("calcDisc").value);
     var mast = Number(document.getElementById("calcMastery").value);
@@ -4207,8 +4256,6 @@ ${negativeAbil}`;
     var size = document.getElementById('calcCCS').value;
     var strength = (Number(document.getElementById('calcCCSTR').value)*2)+10;
     var movement = document.getElementById('calcMVMNT').value ? document.getElementById('calcCCMVMNT').value : 0;
-    // size*5*strength
-    // if cart speed daytravel calc w cart else daytravel
     var carrycapacity = size*2.5*cartMultiplier*strength-cart;
     var pushdraglift = carrycapacity*2;
     var carryslots = (strength*2)+(cart/cartMultiplier);
@@ -4424,20 +4471,6 @@ ${negativeAbil}`;
         break;
     }
     document.getElementById("calcChallenge").innerText = CR + '/+' + dndCRtable[table][6] + '/' + dndCRtable[table][8];
-  }
-  function orderofTurn() {
-    var str = document.getElementById("turnOrder").value;
-    var n = str.split("\n");
-    var elements = [];
-    for (let i in n) {
-      elements.push(n[i]);
-    }
-    var arr = elements.sort((a, b) => sortByDataString(a, b));
-    var voidnoid;
-    document.getElementById("turnOrder").value = '';
-    for (let y in arr) {
-      arr[y] === '' ? voidnoid = '' : document.getElementById("turnOrder").value = document.getElementById("turnOrder").value + arr[y] + "\n";
-    }
   }
   function signAdd(num) {
     if (isNaN(num)) {

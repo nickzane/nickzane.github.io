@@ -63,6 +63,46 @@ h4 {
   background: url('svg/dice-d20.svg') left top/contain no-repeat;
 }
 
+.highlight {
+  background-color: #0DF;
+}
+
+.absolute{
+  position: absolute;
+}
+
+.relative{
+  position: relative;
+}
+
+.right{
+  right:0;
+}
+
+.left{
+  left:0;
+}
+
+.initiative{
+  color:black;
+  font-weight: bold;
+  font-size: 2em;
+}
+
+.dark-mode .initiative{
+  color:white;
+  font-weight: bold;
+  font-size: 2em;
+}
+
+.lightgray{
+  background:lightgray;
+}
+
+.dark-mode .lightgray{
+  background:dimgray;
+}
+
 .dark-mode, .dark-mode .navbar, .dark-mode #footer, .dark-mode .buttonSets {
   color:#cecac3;
   background-color: #262a2b;
@@ -119,7 +159,11 @@ h4 {
   color:orange;
 }
 
-.right{
+.floatright{
+  float: right;
+}
+
+.rightalign{
   text-align: right;
 }
 
@@ -154,7 +198,7 @@ h4 {
 
 .boxholder{
   display:inline-block;
-  width:25%;
+  width:33.3%;
   height:100%;
   position:relative;
   padding:0.1em;
@@ -234,6 +278,10 @@ h4 {
 
 .em1high{
   height:1em;
+}
+
+.em2high{
+  height:3em;
 }
 
 #results{
@@ -760,7 +808,6 @@ select option {
 }
 
 .full-width-element {
-  background: #eee;
   width: 100%;
   box-sizing: border-box;
 }
@@ -833,12 +880,26 @@ select option {
   color:#F00;
 }
 
+.topper {
+  position: absolute;
+  top: 10px;
+}
+  
+.hanglefter {
+left: 10px;
+top: -14px;
+}
+
+.hangrighter {
+right: 10px;
+top: -14px;
+}
+
 .deck-count {
   position: absolute;
   right: 0;
-  top: -40px;
+  top: 0;
   padding: 10px;
-  color: black;
 }
 
 #timesUp {
@@ -857,7 +918,7 @@ select option {
 }
 
 .main {
-  margin-top: 120px;
+  margin-top: 9em;
 }
 
 .abilHeader {
