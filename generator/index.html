@@ -161,6 +161,15 @@
       <div id="timerBox"><span id="readTimer"></span> <span id="rollTime"></span></div>
     </div>
     </div>
+    <div class="full-width-element center lightgray relative">
+      <a class="black middle hangrighter topper" onclick="addtoTurnOrder('enemy')" title="Add Enemy">
+        <img class="em1high" src="svg/swords.svg" />
+      </a>
+      <span id="turnOrder" class="initiative center" contenteditable="true">Turn Order</span>
+      <a class="black middle hanglefter topper" onclick="handoffate()">
+        <img class="em1high" src="svg/hand.svg" /> Hand of Fate
+      </a>
+    </div>
     <div class="full-width-element">
       <input id="search" oninput="showList()" placeholder="Search for ability or item" />
       <div id="results"></div>
@@ -328,8 +337,8 @@
         <img onclick="addMarker('chess-king', '', '', 0)" src="svg/chess-king.svg" title="ADD BLACK KING"/>
         <img onclick="addMarker('chess-circle', '', '', 0)" src="svg/chess-circle.svg" title="ADD CHECKER"/>
         <img onclick="chessBoard()" src="svg/chess.svg" title="CHESS PIECES"/>
-        <img class="white" onclick="taflBoard()" src="svg/chess.svg" title="TAFL PIECES"/>
-        <img class="white" onclick="checkerBoard()" src="svg/chess-circle.svg" title="CHECKER PIECES"/>
+        <img onclick="taflBoard()" src="svg/axe-battle.svg" title="TAFL PIECES"/>
+        <img onclick="checkerBoard()" src="svg/circle-x.svg" title="CHECKER PIECES"/>
         <img onclick="clearChessboard()" src="svg/chess-board.svg" title="CLEAR BOARD"/>
       </div>
     </div>
@@ -351,8 +360,6 @@
         </tr>
       </tbody>
     </table>
-    <div class="right"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button"
-        onClick="countUp()">Round</button></div>
     <input class="full" type="text" id="NPCname" placeholder="NPC/PC Name" />
     <select class="halfsies" id="NPCtier">
       <option value="random">Random Tier</option>
@@ -573,6 +580,7 @@
       <hr>
     </div>
     <div class="form-group">
+      <div class="floatright"><a onclick="resetCount()" title="Double click to reset">Round: </a><a id="clicks">0</a> <button type="button" onClick="countUp()">Round</button></div>
       <div class="black">Crossbow Bolts (20) 1 GP 1½ lb. | Arrows (20) 1 GP 1 lb. | Darts (20) 1 GP 5 lb. | Blowgun
         Needles (50) 1 GP 1 lb. | 8 glugs to a gallon | 500 GP weight = 1 inventory slot | Add 1 Inventory slot per CON
       </div>
@@ -581,27 +589,17 @@
       <div class="black">Proficiency Bonus: T1:D4 | T2:D6 | T3:D8 | T4:D10 | Attunement: INT, WIS, CHA or CON (min 2
         + tier) | (Languages) (Secret Language) (Magic Disciplines) (Snap Spell) (Prepared Spell) (Known Spell) (Proficiency) (Double Proficiency) (Ability) (Other Abilities) (Quirk)</div>
       <div class="black">CTRL+SHIFT+S - Toggle Footer | CTRL+SHIFT+D - Clear Footer | CTRL+SHIFT+A - Toggle Dice Roller| CTRL+SHIFT+~ - Reset Dice Roller | CTRL+SHIFT+Q - Toggle Calculator | Numpad for Calc Input | Name Change Confirm - Enter | Press ADD Marker to store PC/NPC in page</div>
-    </div>
-    <span class="boxholder">
-      <a class="black hangright" onclick="addtoTurnOrder('empty')"
-        title="Add Empty">
-        <img class="em1high" src="svg/swords.svg" /></a>
-      <textarea class="full" rows="20" onfocusout="orderofTurn()" id="turnOrder" name="turnOrder"
-        placeholder="Party List & Turn Order"></textarea>
-      <span onclick="handoffate(this)" class="black hangright lightback"><img class="em1high" src="svg/hand.svg" /> Hand of Fate</span>
-    </span><span class="boxholder">
-      <a class="black hangright" onclick="twoDice(this)"
-        title="Two Dice Bell Curve"><img class="em1high" src="svg/dice.svg" /></a>
-      <textarea class="full" rows="20" placeholder="List & Random Table"></textarea>
-      <span onclick="handoffate(this)"
-        class="black hangright lightback"><img class="em1high" src="svg/hand.svg" /> Hand of Fate</span>
+    </div><span class="boxholder">
+      <a class="black hangrighttop" onclick="orderofTurn()" title="Organize Alphabetically"><img class="em1high" src="svg/arrow-down-short-wide.svg" /></a>
+      <a class="black hangleft" onclick="twoDice()" title="Two Dice Bell Curve"><img class="em1high" src="svg/dice.svg" /></a>
+      <textarea id="randomTable" class="full" rows="20" placeholder="List & Random Table"></textarea>
+      <span onclick="oneofMany()"
+        class="black hangright lightback"><img class="em1high" src="svg/bullseye-arrow.svg" /> One of Many</span>
     </span><span class="boxholder">
       <span class="deck-count"></span>
-      <a class="black hangright" onclick="drawCard(this,1)"
-        title="Draw A Card">♠♥♣♦</a>
-      <textarea class="cardtable" rows="20" placeholder="Card Table"></textarea>
-      <span class="black hangleft" onclick="drawCard(this,0)"
-        title="Reshuffle">×</span>
+      <a class="black hangright" onclick="drawCard(this,1)" title="Draw A Card">♠♥♣♦</a>
+      <textarea id="cardtable" class="cardtable" rows="20" placeholder="Card Table"></textarea>
+      <span class="black hangleft" onclick="drawCard(this,0)" title="Reshuffle">×</span>
     </span><span class="boxholder">
       <textarea class="full" rows="20" id="exportNPC" placeholder="Exported NPC JSON"></textarea>
       <span onclick="saveTxt(this)" class="black hangrighttop lightback"><img class="em1high" src="svg/floppy-disk.svg" /> Save Text</span>
