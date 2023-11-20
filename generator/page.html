@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Game</title>
+    <style>
+        .player {
+            margin-bottom: 20px;
+        }
+        .card {
+            width: 60px;
+            height: 90px;
+            border: 1px solid #000;
+            margin: 0 5px;
+            text-align: center;
+            line-height: 90px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <label for="addPlayer">Add Player:</label>
+    <input type="text" id="addPlayer" placeholder="Player Name">
+    <button onclick="addPlayer()">Add Player</button>
+
+    <label for="dealTo">Deal to:</label>
+    <select id="dealTo"></select>
+
+    <label for="dealOrientation">Deal Orientation:</label>
+    <select id="dealOrientation">
+        <option value="up">Face Up</option>
+        <option value="down">Face Down</option>
+    </select>
+
+    <button onclick="dealCard()">Deal</button>
+    <button onclick="reshuffle()">Reshuffle</button>
+    <button onclick="reclaimCards()">Reclaim Cards</button>
+</div>
+
+<div id="players"></div>
+
+<script>
+    let deck = [];
+    let discardPile = [];
+    let players = [];
+
+    function initializeDeck() {
+        deck = [];
+        const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+        const ranks = ['Joker', 'Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King'];
+
+        for (const suit of suits) {
+            for (const rank of ranks) {
+                deck.push({ suit, rank, faceUp: true });
+            }
+        }
+    }
+
+    function addPlayer() {
+        const playerName = document.getElementById('addPlayer').value;
+        if (playerName && players.length < 8) {
+            players.push({ name: playerName, hand: [] });
+            renderPlayers();
+            renderDealToDropdown();
+        }
+    }
+
+    function renderPlayers() {
+        const playersContainer = document.getElementById('players');
+        playersContainer.innerHTML = '';
+
+        players.forEach(player => {
+            const playerDiv = document.createElement('div');
+            playerDiv.classList.add('player');
+            playerDiv.textContent = player.name;
+
+            player.hand.forEach(card => {
+                const cardDiv = createCardDiv(card);
+                cardDiv.onclick = () => toggleCardOrientation(card);
+                playerDiv.appendChild(cardDiv);
+            });
+
+            playersContainer.appendChild(playerDiv);
+        });
+
+        renderDealToDropdown();
+    }
+
+    function createCardDiv(card) {
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('card');
+        cardDiv.textContent = card.faceUp ? `${card.rank} of ${card.suit}` : 'Card';
+        cardDiv.onclick = () => toggleCardOrientation(card);
+        return cardDiv;
+    }
+
+    function renderDealToDropdown() {
+        const dealToDropdown = document.getElementById('dealTo');
+        dealToDropdown.innerHTML = '';
+
+        players.forEach(player => {
+            const option = document.createElement('option');
+            option.value = player.name;
+            option.text = player.name;
+            dealToDropdown.appendChild(option);
+        });
+    }
+
+    function dealCard() {
+        const dealToPlayerName = document.getElementById('dealTo').value;
+        const dealOrientation = document.getElementById('dealOrientation').value;
+
+        const dealToPlayer = players.find(player => player.name === dealToPlayerName);
+
+        if (deck.length > 0 && dealToPlayer) {
+            const card = deck.pop();
+            card.faceUp = dealOrientation === 'up';
+            dealToPlayer.hand.push({ ...card });
+
+            renderPlayers();
+        }
+    }
+
+    function toggleCardOrientation(card) {
+        card.faceUp = !card.faceUp;
+        renderPlayers();
+    }
+
+    function reshuffle() {
+        deck.push(...discardPile);
+        discardPile = [];
+        initializeDeck();
+        renderPlayers();
+    }
+
+    function reclaimCards() {
+        deck.push(...discardPile);
+        players.forEach(player => {
+            deck.push(...player.hand);
+            player.hand = [];
+        });
+        renderPlayers();
+    }
+
+    // Initialize the deck and render players on page load
+    initializeDeck();
+    renderPlayers();
+</script>
+
+</body>
+</html>

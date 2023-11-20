@@ -2677,7 +2677,7 @@ Abilities: ${ability}Gear: ${charGear}`;
         <td onclick="rollCell(6, this.childNodes[1].innerHTML)" title="Standard">1d6 <div class="data1d6" contenteditable="true">${effort[1]}</div></td>
         <td onclick="rollCell(8, this.childNodes[1].innerHTML)" title="Advanced">1d8 <div class="data1d8" contenteditable="true">${effort[2]}</div></td>
         <td onclick="rollCell(10, this.childNodes[1].innerHTML)" title="Enhanced">1d10 <div class="data1d10" contenteditable="true">${effort[3]}</div></td>
-        <td onclick="rollCell(12, this.childNodes[1].innerHTML)" title="Perfect">1d12 <div class="data1d12" contenteditable="true">${effort[4]}</div></td>
+        <td onclick="rollCell(12, this.childNodes[1].innerHTML)" title="Ultimate">1d12 <div class="data1d12" contenteditable="true">${effort[4]}</div></td>
         <td onclick="rollCell(20, this.childNodes[1].innerHTML)">DEF <div class="dataDEF data1d20" contenteditable="true">${charDEF}</div></td>
       </tr>
       <tr>
